@@ -1,5 +1,83 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Setup Prisma
+
+```bash
+yarn add prisma @types/node --dev
+yarn add @prisma/client dotenv
+# select your db adapter
+# mariadb
+# yarn add @prisma/adapter-mariadb
+# pg
+# yarn add @prisma/adapter-pg pg
+```
+
+Mysql/Mariadb
+
+```bash
+yarn add @prisma/adapter-mariadb
+yarn prisma init --datasource-provider mysql --output ./generated/client
+```
+
+`.env` file:
+
+```env
+DATABASE_URL="mysql://root:@localhost:3306/kegel"
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USER=root
+DATABASE_PASSWORD=
+DATABASE_NAME=kegel
+```
+
+Example Model in `schema.prisma`:
+
+```prisma
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String? @db.Text
+  published Boolean @default(false)
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
+```
+
+Run generate:
+
+```bash
+yarn prisma generate
+yarn prisma db push
+```
+
+`lib/prisma.ts`:
+
+```typescript
+import "dotenv/config";
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { PrismaClient } from '../prisma/generated/client/client';
+
+const adapter = new PrismaMariaDb({
+  host: process.env.DATABASE_HOST,
+  port: parseInt(process.env.DATABASE_PORT || '3306'),
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  connectionLimit: 5
+});
+const prisma = new PrismaClient({ adapter });
+
+export { prisma }
+```
+
+
 ## Getting Started
 
 First, run the development server:
