@@ -2,6 +2,9 @@
   "name": "contracts",
   "version": "1.0.0",
   "type": "module",
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^4.0.4",
     "@nomicfoundation/hardhat-ethers-chai-matchers": "^3.0.0",

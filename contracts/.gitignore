@@ -1,3 +1,7 @@
+# Environment variables
+.env
+.env.local
+
 # Node modules
 /node_modules
 
@@ -18,3 +22,6 @@
 
 # Hardhat coverage reports
 /coverage
+
+# Hardhat Ignition deployments
+/ignition/deployments
