@@ -1,116 +1,181 @@
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+"use client";
 
-async function getSeasons() {
-  const seasons = await prisma.season.findMany({
-    where: { active: true },
-    orderBy: { startTime: "desc" },
+import { useState, useEffect } from "react";
+import { useAccount, useReadContract } from "wagmi";
+import { ConnectWalletDialog } from "@/components/ConnectWalletDialog";
+import { CheckInSection } from "@/components/CheckInSection";
+import { UserStats } from "@/components/UserStats";
+import { Leaderboard } from "@/components/Leaderboard";
+import { DailyKegelABI } from "@/lib/abi/DailyKegel";
+import { CONTRACT_ADDRESS, TOKEN_ADDRESS } from "@/lib/config";
+
+export default function HomePage() {
+  const { isConnected, address } = useAccount();
+  const [trainingCompleted, setTrainingCompleted] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 读取合约 startTime
+  const { data: startTime } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: DailyKegelABI,
+    functionName: "startTime",
+    query: { enabled: !!CONTRACT_ADDRESS && CONTRACT_ADDRESS !== "0x待部署的合约地址" as `0x${string}` },
   });
-  return seasons;
-}
 
-export default async function HomePage() {
-  const seasons = await getSeasons();
+  const now = Math.floor(Date.now() / 1000);
+  const hasStarted = startTime ? now >= Number(startTime) : false;
+  const configValid = CONTRACT_ADDRESS && CONTRACT_ADDRESS !== "0x待部署的合约地址" as `0x${string}`;
+
+  // 格式化开始时间
+  const formatStartTime = (timestamp: bigint) => {
+    const date = new Date(Number(timestamp) * 1000);
+    return date.toLocaleString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // 防止 hydration 问题
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold">DailyKegel</h1>
+          <ConnectWalletDialog />
+        </header>
+
         {/* Hero Section */}
-        <section className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            DailyKegel
-          </h1>
-          <p className="text-xl text-muted-foreground mb-4">
-            每日凯格尔运动，锻炼盆底肌群，增强身体健康
+        <section className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            每日凯格尔运动
+          </h2>
+          <p className="text-lg text-muted-foreground mb-2">
+            锻炼盆底肌群，增强身体健康
           </p>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            DailyKegel 是一个 BSC 链上的 DApp，通过赛季制打卡激励你养成每日锻炼的习惯。
-            完成训练后打卡，积累打卡次数，赢取赛季奖励！
+            完成训练后打卡，积累 Combo 连击，登上排行榜！
           </p>
         </section>
 
-        {/* How it works */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold text-center mb-8">如何参与</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-card rounded-lg p-6 text-center">
-              <div className="text-4xl mb-4">🔗</div>
-              <h3 className="font-semibold mb-2">连接钱包</h3>
-              <p className="text-sm text-muted-foreground">
-                使用 MetaMask 或其他钱包连接到 BSC 网络
+        {/* 配置未完成提示 */}
+        {!configValid && (
+          <section className="mb-8">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">配置未完成</h3>
+              <p className="text-yellow-700">
+                请在 .env 文件中配置 NEXT_PUBLIC_CONTRACT_ADDRESS
               </p>
             </div>
-            <div className="bg-card rounded-lg p-6 text-center">
-              <div className="text-4xl mb-4">🏋️</div>
-              <h3 className="font-semibold mb-2">完成训练</h3>
-              <p className="text-sm text-muted-foreground">
-                跟随指引完成慢速、快速、耐力三项凯格尔训练
-              </p>
-            </div>
-            <div className="bg-card rounded-lg p-6 text-center">
-              <div className="text-4xl mb-4">✅</div>
-              <h3 className="font-semibold mb-2">打卡领奖</h3>
-              <p className="text-sm text-muted-foreground">
-                每日打卡一次，赛季结束后打卡最多者赢得奖池
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* Season List */}
-        <section>
-          <h2 className="text-2xl font-bold text-center mb-8">赛季列表</h2>
-          {seasons.length === 0 ? (
-            <div className="text-center text-muted-foreground py-12">
-              <p>暂无进行中的赛季</p>
-              <p className="text-sm mt-2">请稍后再来查看</p>
+        {/* 还没开始提示 */}
+        {configValid && !hasStarted && startTime && (
+          <section className="mb-8">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+              <h3 className="text-xl font-semibold text-blue-800 mb-2">活动即将开始</h3>
+              <p className="text-blue-700 mb-4">
+                开始时间：{formatStartTime(startTime)}
+              </p>
+              <p className="text-blue-600 text-sm">
+                敬请期待！
+              </p>
             </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {seasons.map((season) => {
-                const now = new Date();
-                const isActive = now >= season.startTime && now < season.endTime;
-                const isUpcoming = now < season.startTime;
-                const isEnded = now >= season.endTime;
+          </section>
+        )}
 
-                return (
-                  <Link
-                    key={season.id}
-                    href={`/season/${season.name}`}
-                    className="block bg-card rounded-lg p-6 hover:shadow-lg transition-shadow border"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-lg">{season.displayName}</h3>
-                      {isActive && (
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                          进行中
-                        </span>
-                      )}
-                      {isUpcoming && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          即将开始
-                        </span>
-                      )}
-                      {isEnded && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                          已结束
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p>
-                        开始：{season.startTime.toLocaleDateString("zh-CN")}
-                      </p>
-                      <p>
-                        结束：{season.endTime.toLocaleDateString("zh-CN")}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
+        {/* Main Content */}
+        {configValid && hasStarted && (
+          <>
+            {/* 未连接钱包 */}
+            {!isConnected ? (
+              <section className="mb-12">
+                <div className="bg-card rounded-lg p-12 text-center border">
+                  <h3 className="text-xl font-semibold mb-4">连接钱包开始打卡</h3>
+                  <p className="text-muted-foreground mb-6">
+                    连接你的钱包，开始每日凯格尔训练
+                  </p>
+                  <ConnectWalletDialog />
+                </div>
+              </section>
+            ) : (
+              <>
+                {/* 用户数据 */}
+                <section className="mb-8">
+                  <UserStats
+                    contractAddress={CONTRACT_ADDRESS}
+                    tokenAddress={TOKEN_ADDRESS}
+                  />
+                </section>
+
+                {/* 打卡区域 */}
+                <section className="mb-12">
+                  <CheckInSection
+                    contractAddress={CONTRACT_ADDRESS}
+                    tokenAddress={TOKEN_ADDRESS}
+                    trainingCompleted={trainingCompleted}
+                    onTrainingComplete={() => setTrainingCompleted(true)}
+                  />
+                </section>
+              </>
+            )}
+
+            {/* 排行榜 */}
+            <section>
+              <h2 className="text-2xl font-bold text-center mb-6">排行榜</h2>
+              <Leaderboard contractAddress={CONTRACT_ADDRESS} />
+            </section>
+          </>
+        )}
+
+        {/* How it works (当配置有效时始终显示) */}
+        {configValid && (
+          <section className="mt-16 mb-8">
+            <h2 className="text-2xl font-bold text-center mb-8">如何参与</h2>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="bg-card rounded-lg p-6 text-center border">
+                <div className="text-3xl mb-3">1</div>
+                <h3 className="font-semibold mb-2">连接钱包</h3>
+                <p className="text-sm text-muted-foreground">
+                  使用 MetaMask 等钱包连接 BSC 网络
+                </p>
+              </div>
+              <div className="bg-card rounded-lg p-6 text-center border">
+                <div className="text-3xl mb-3">2</div>
+                <h3 className="font-semibold mb-2">完成训练</h3>
+                <p className="text-sm text-muted-foreground">
+                  跟随指引完成凯格尔训练
+                </p>
+              </div>
+              <div className="bg-card rounded-lg p-6 text-center border">
+                <div className="text-3xl mb-3">3</div>
+                <h3 className="font-semibold mb-2">每日打卡</h3>
+                <p className="text-sm text-muted-foreground">
+                  捐赠 UU 代币完成打卡
+                </p>
+              </div>
+              <div className="bg-card rounded-lg p-6 text-center border">
+                <div className="text-3xl mb-3">4</div>
+                <h3 className="font-semibold mb-2">保持 Combo</h3>
+                <p className="text-sm text-muted-foreground">
+                  连续打卡累积 Combo，登上排行榜
+                </p>
+              </div>
             </div>
-          )}
-        </section>
+          </section>
+        )}
       </div>
     </main>
   );

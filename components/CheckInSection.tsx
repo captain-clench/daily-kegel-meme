@@ -15,6 +15,25 @@ interface Props {
   onTrainingComplete: () => void;
 }
 
+// 格式化时间显示
+function formatDateTime(timestamp: number) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString("zh-CN", {
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// 格式化倒计时
+function formatCountdown(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
 export function CheckInSection({
   contractAddress,
   tokenAddress,
@@ -33,10 +52,26 @@ export function CheckInSection({
     query: { enabled: !!address },
   });
 
-  const { data: nextCheckinTime } = useReadContract({
+  const { data: nextCheckinTime, refetch: refetchNextCheckinTime } = useReadContract({
     address: contractAddress,
     abi: DailyKegelABI,
     functionName: "nextCheckinTime",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+
+  const { data: comboDeadline, refetch: refetchComboDeadline } = useReadContract({
+    address: contractAddress,
+    abi: DailyKegelABI,
+    functionName: "comboDeadline",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+
+  const { data: userData } = useReadContract({
+    address: contractAddress,
+    abi: DailyKegelABI,
+    functionName: "userData",
     args: address ? [address] : undefined,
     query: { enabled: !!address },
   });
@@ -69,11 +104,15 @@ export function CheckInSection({
   useEffect(() => {
     if (isCheckInSuccess) {
       refetchCanCheckIn();
+      refetchNextCheckinTime();
+      refetchComboDeadline();
     }
-  }, [isCheckInSuccess, refetchCanCheckIn]);
+  }, [isCheckInSuccess, refetchCanCheckIn, refetchNextCheckinTime, refetchComboDeadline]);
 
   const donationInWei = parseUnits(donationAmount || "0", 18);
   const needsApproval = !allowance || allowance < donationInWei;
+  const currentCombo = userData?.[3] ?? 0n;
+  const hasCheckedInBefore = userData?.[2] ? Number(userData[2]) > 0 : false;
 
   const handleApprove = () => {
     approve({
@@ -93,45 +132,97 @@ export function CheckInSection({
     });
   };
 
-  // Countdown timer
-  const [countdown, setCountdown] = useState("");
+  // Countdown timers
+  const [cooldownCountdown, setCooldownCountdown] = useState("");
+  const [comboCountdown, setComboCountdown] = useState("");
+
   useEffect(() => {
-    if (!nextCheckinTime || canCheckIn) return;
-
-    const updateCountdown = () => {
+    const updateCountdowns = () => {
       const now = Math.floor(Date.now() / 1000);
-      const target = Number(nextCheckinTime);
-      const diff = target - now;
 
-      if (diff <= 0) {
-        setCountdown("");
-        refetchCanCheckIn();
-        return;
+      // 冷却倒计时
+      if (nextCheckinTime && !canCheckIn) {
+        const target = Number(nextCheckinTime);
+        const diff = target - now;
+        if (diff > 0) {
+          setCooldownCountdown(formatCountdown(diff));
+        } else {
+          setCooldownCountdown("");
+          refetchCanCheckIn();
+        }
+      } else {
+        setCooldownCountdown("");
       }
 
-      const hours = Math.floor(diff / 3600);
-      const minutes = Math.floor((diff % 3600) / 60);
-      const seconds = diff % 60;
-      setCountdown(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
+      // Combo 截止倒计时
+      if (comboDeadline && Number(comboDeadline) > 0) {
+        const target = Number(comboDeadline);
+        const diff = target - now;
+        if (diff > 0) {
+          setComboCountdown(formatCountdown(diff));
+        } else {
+          setComboCountdown("");
+        }
+      } else {
+        setComboCountdown("");
+      }
     };
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
+    updateCountdowns();
+    const interval = setInterval(updateCountdowns, 1000);
     return () => clearInterval(interval);
-  }, [nextCheckinTime, canCheckIn, refetchCanCheckIn]);
+  }, [nextCheckinTime, comboDeadline, canCheckIn, refetchCanCheckIn]);
 
-  // If can't check in, show countdown
-  if (!canCheckIn && countdown) {
+  // 判断是否在 combo 有效期内
+  const now = Math.floor(Date.now() / 1000);
+  const isInComboWindow = comboDeadline && Number(comboDeadline) > now;
+
+  // 如果在冷却时间内，显示倒计时
+  if (!canCheckIn && cooldownCountdown) {
     return (
       <div className="bg-card rounded-lg p-8 text-center border">
         <h3 className="text-xl font-semibold mb-2">今日已打卡</h3>
-        <p className="text-muted-foreground mb-4">下次打卡倒计时</p>
-        <p className="text-4xl font-mono font-bold">{countdown}</p>
+
+        {/* 当前 Combo */}
+        {currentCombo > 0n && (
+          <div className="mb-4">
+            <span className="text-sm text-muted-foreground">当前 Combo</span>
+            <p className="text-3xl font-bold text-primary">{currentCombo.toString()}</p>
+          </div>
+        )}
+
+        {/* 下次打卡倒计时 */}
+        <div className="mb-4">
+          <p className="text-sm text-muted-foreground mb-1">下次打卡倒计时</p>
+          <p className="text-4xl font-mono font-bold">{cooldownCountdown}</p>
+          {nextCheckinTime && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {formatDateTime(Number(nextCheckinTime))} 可打卡
+            </p>
+          )}
+        </div>
+
+        {/* Combo 截止时间 */}
+        {isInComboWindow && comboCountdown && (
+          <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+            <p className="text-sm text-green-700 dark:text-green-300 mb-1">
+              Combo 接续截止
+            </p>
+            <p className="text-2xl font-mono font-bold text-green-600 dark:text-green-400">
+              {comboCountdown}
+            </p>
+            {comboDeadline && (
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                在 {formatDateTime(Number(comboDeadline))} 前打卡可接续 Combo
+              </p>
+            )}
+          </div>
+        )}
       </div>
     );
   }
 
-  // If training not completed and can check in, show training
+  // 如果可以打卡且训练未完成，显示训练入口
   if (!trainingCompleted && canCheckIn) {
     if (isTraining) {
       return (
@@ -147,9 +238,32 @@ export function CheckInSection({
     return (
       <div className="bg-card rounded-lg p-8 text-center border">
         <h3 className="text-xl font-semibold mb-2">开始今日训练</h3>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-muted-foreground mb-4">
           完成凯格尔训练后即可打卡
         </p>
+
+        {/* Combo 提示 */}
+        {hasCheckedInBefore && isInComboWindow && (
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+            <p className="text-sm text-green-700 dark:text-green-300">
+              当前 Combo: <span className="font-bold">{currentCombo.toString()}</span>
+            </p>
+            {comboCountdown && (
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                在 {comboCountdown} 内完成打卡，Combo +1！
+              </p>
+            )}
+          </div>
+        )}
+
+        {hasCheckedInBefore && !isInComboWindow && (
+          <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
+            <p className="text-sm text-orange-700 dark:text-orange-300">
+              Combo 已断裂，打卡将开始新的 Combo
+            </p>
+          </div>
+        )}
+
         <Button size="lg" onClick={() => setIsTraining(true)}>
           开始训练
         </Button>
@@ -157,11 +271,32 @@ export function CheckInSection({
     );
   }
 
-  // Training completed, show check-in form
+  // 训练完成，显示打卡表单
   if (trainingCompleted && canCheckIn) {
     return (
       <div className="bg-card rounded-lg p-8 border">
         <h3 className="text-xl font-semibold mb-4 text-center">训练完成！</h3>
+
+        {/* Combo 提示 */}
+        {hasCheckedInBefore && isInComboWindow && (
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
+            <p className="text-sm text-green-700 dark:text-green-300">
+              当前 Combo: <span className="font-bold">{currentCombo.toString()}</span>
+            </p>
+            <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+              打卡后 Combo 将变为 {(currentCombo + 1n).toString()}！
+            </p>
+          </div>
+        )}
+
+        {hasCheckedInBefore && !isInComboWindow && (
+          <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg text-center">
+            <p className="text-sm text-orange-700 dark:text-orange-300">
+              Combo 已断裂，打卡将开始新的 Combo
+            </p>
+          </div>
+        )}
+
         <p className="text-muted-foreground text-center mb-6">
           输入捐赠数量完成打卡
         </p>

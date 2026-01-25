@@ -37,11 +37,16 @@ export function UserStats({ contractAddress, tokenAddress }: Props) {
 
   const checkinCount = userData?.[0] ?? 0n;
   const donationTotal = userData?.[1] ?? 0n;
+  const currentCombo = userData?.[3] ?? 0n;
 
   return (
     <div className="bg-card rounded-lg p-6 border">
       <h3 className="font-semibold mb-4">我的数据</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div>
+          <p className="text-sm text-muted-foreground">当前 Combo</p>
+          <p className="text-2xl font-bold text-primary">{currentCombo.toString()}</p>
+        </div>
         <div>
           <p className="text-sm text-muted-foreground">打卡次数</p>
           <p className="text-2xl font-bold">{checkinCount.toString()}</p>
@@ -59,7 +64,7 @@ export function UserStats({ contractAddress, tokenAddress }: Props) {
           </p>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">当前奖池</p>
+          <p className="text-sm text-muted-foreground">累计捐赠池</p>
           <p className="text-2xl font-bold">
             {totalPool ? formatUnits(totalPool, 18) : "0"} UU
           </p>

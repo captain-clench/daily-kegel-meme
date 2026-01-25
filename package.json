@@ -1,5 +1,5 @@
 {
-  "name": "kegel-exercises-meme",
+  "name": "captain-clench",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,6 +14,7 @@
     "@prisma/client": "^7.3.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.62.0",
+    "@xstate/react": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
@@ -23,7 +24,8 @@
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.4.0",
     "viem": "^2.21.0",
-    "wagmi": "^2.14.0"
+    "wagmi": "^2.14.0",
+    "xstate": "^5.25.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

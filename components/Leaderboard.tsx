@@ -14,8 +14,14 @@ type LeaderboardEntry = {
   value: bigint;
 };
 
+type ComboEntry = {
+  user: `0x${string}`;
+  startBlock: bigint;
+  comboCount: bigint;
+};
+
 export function Leaderboard({ contractAddress }: Props) {
-  const [tab, setTab] = useState<"checkin" | "donation">("checkin");
+  const [tab, setTab] = useState<"combo" | "checkin" | "donation">("combo");
 
   const { data: checkinLeaderboard } = useReadContract({
     address: contractAddress,
@@ -29,17 +35,39 @@ export function Leaderboard({ contractAddress }: Props) {
     functionName: "getDonationLeaderboard",
   });
 
-  const leaderboard = tab === "checkin" ? checkinLeaderboard : donationLeaderboard;
-  const filteredLeaderboard = (leaderboard as LeaderboardEntry[] | undefined)?.filter(
+  const { data: comboLeaderboard } = useReadContract({
+    address: contractAddress,
+    abi: DailyKegelABI,
+    functionName: "getComboLeaderboard",
+  });
+
+  // 过滤排行榜数据
+  const filteredCheckin = (checkinLeaderboard as LeaderboardEntry[] | undefined)?.filter(
     (entry) => entry.user !== "0x0000000000000000000000000000000000000000" && entry.value > 0n
+  ) ?? [];
+
+  const filteredDonation = (donationLeaderboard as LeaderboardEntry[] | undefined)?.filter(
+    (entry) => entry.user !== "0x0000000000000000000000000000000000000000" && entry.value > 0n
+  ) ?? [];
+
+  const filteredCombo = (comboLeaderboard as ComboEntry[] | undefined)?.filter(
+    (entry) => entry.user !== "0x0000000000000000000000000000000000000000" && entry.comboCount > 0n
   ) ?? [];
 
   return (
     <div className="bg-card rounded-lg p-6 border">
-      <h3 className="font-semibold mb-4">排行榜</h3>
-
       {/* Tabs */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-6 flex-wrap">
+        <button
+          onClick={() => setTab("combo")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            tab === "combo"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted hover:bg-muted/80"
+          }`}
+        >
+          Combo 连击
+        </button>
         <button
           onClick={() => setTab("checkin")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -62,42 +90,131 @@ export function Leaderboard({ contractAddress }: Props) {
         </button>
       </div>
 
-      {/* List */}
-      {filteredLeaderboard.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">暂无数据</p>
-      ) : (
-        <div className="space-y-2">
-          {filteredLeaderboard.map((entry, index) => (
-            <div
-              key={entry.user}
-              className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50"
-            >
-              <div className="flex items-center gap-3">
-                <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    index === 0
-                      ? "bg-yellow-400 text-yellow-900"
-                      : index === 1
-                      ? "bg-gray-300 text-gray-700"
-                      : index === 2
-                      ? "bg-amber-600 text-amber-100"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+      {/* Combo Leaderboard */}
+      {tab === "combo" && (
+        <>
+          {filteredCombo.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">暂无数据</p>
+          ) : (
+            <div className="space-y-2">
+              {filteredCombo.map((entry, index) => (
+                <div
+                  key={`${entry.user}-${entry.startBlock}`}
+                  className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/50"
                 >
-                  {index + 1}
-                </span>
-                <span className="font-mono text-sm">
-                  {entry.user.slice(0, 6)}...{entry.user.slice(-4)}
-                </span>
-              </div>
-              <span className="font-semibold">
-                {tab === "checkin"
-                  ? entry.value.toString()
-                  : `${formatUnits(entry.value, 18)} UU`}
-              </span>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                        index === 0
+                          ? "bg-yellow-400 text-yellow-900"
+                          : index === 1
+                          ? "bg-gray-300 text-gray-700"
+                          : index === 2
+                          ? "bg-amber-600 text-amber-100"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    <div>
+                      <span className="font-mono text-sm">
+                        {entry.user.slice(0, 6)}...{entry.user.slice(-4)}
+                      </span>
+                      <p className="text-xs text-muted-foreground">
+                        #{entry.startBlock.toString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-lg">{entry.comboCount.toString()}</span>
+                    <span className="text-sm text-muted-foreground ml-1">连击</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
+      )}
+
+      {/* Check-in Leaderboard */}
+      {tab === "checkin" && (
+        <>
+          {filteredCheckin.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">暂无数据</p>
+          ) : (
+            <div className="space-y-2">
+              {filteredCheckin.map((entry, index) => (
+                <div
+                  key={entry.user}
+                  className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                        index === 0
+                          ? "bg-yellow-400 text-yellow-900"
+                          : index === 1
+                          ? "bg-gray-300 text-gray-700"
+                          : index === 2
+                          ? "bg-amber-600 text-amber-100"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="font-mono text-sm">
+                      {entry.user.slice(0, 6)}...{entry.user.slice(-4)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-lg">{entry.value.toString()}</span>
+                    <span className="text-sm text-muted-foreground ml-1">次</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Donation Leaderboard */}
+      {tab === "donation" && (
+        <>
+          {filteredDonation.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">暂无数据</p>
+          ) : (
+            <div className="space-y-2">
+              {filteredDonation.map((entry, index) => (
+                <div
+                  key={entry.user}
+                  className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                        index === 0
+                          ? "bg-yellow-400 text-yellow-900"
+                          : index === 1
+                          ? "bg-gray-300 text-gray-700"
+                          : index === 2
+                          ? "bg-amber-600 text-amber-100"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="font-mono text-sm">
+                      {entry.user.slice(0, 6)}...{entry.user.slice(-4)}
+                    </span>
+                  </div>
+                  <span className="font-bold">
+                    {formatUnits(entry.value, 18)} UU
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
