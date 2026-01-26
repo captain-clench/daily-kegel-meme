@@ -3,7 +3,8 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(tree:*)",
-      "Bash(npx hardhat:*)"
+      "Bash(npx hardhat:*)",
+      "Bash(npx shadcn@latest add:*)"
     ]
   }
 }

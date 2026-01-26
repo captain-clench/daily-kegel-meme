@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Architects_Daughter } from "next/font/google";
 import "./globals.css";
-import { WagmiProvider } from "@/lib/wagmi/provider";
+import { Providers } from "@/components/Providers";
+import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const libreBaskerville = Architects_Daughter({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: "400",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
+
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
 
 export const metadata: Metadata = {
   title: "DailyKegel - 每日凯格尔运动打卡",
@@ -24,11 +32,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${libreBaskerville.variable} antialiased`}
       >
-        <WagmiProvider>{children}</WagmiProvider>
+        <Providers>
+          {children}
+          <WalletConnectDialog />
+        </Providers>
       </body>
     </html>
   );

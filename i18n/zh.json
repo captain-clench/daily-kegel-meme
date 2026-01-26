@@ -1,0 +1,103 @@
+{
+  "trans": {
+    "common": {
+      "copy": "复制",
+      "mail": "邮箱",
+      "contact_mail_address": "info@x.com",
+      "connect_wallet": "连接钱包",
+      "disconnect": "断开连接",
+      "loading": "加载中...",
+      "no_data": "暂无数据"
+    },
+    "wallet": {
+      "connect_wallet": "连接钱包",
+      "choose_wallet": "选择一个钱包连接到应用",
+      "connection_failed": "连接钱包失败",
+      "disconnect": "断开连接"
+    },
+    "header": {
+      "language": "语言",
+      "english": "English",
+      "chinese": "简体中文"
+    },
+    "home": {
+      "title": "每日凯格尔运动",
+      "subtitle": "锻炼盆底肌群，增强身体健康",
+      "description": "完成训练后打卡，积累 Combo 连击，登上排行榜！",
+      "config_incomplete": "配置未完成",
+      "config_incomplete_desc": "请在 .env 文件中配置 NEXT_PUBLIC_CONTRACT_ADDRESS",
+      "event_coming_soon": "活动即将开始",
+      "start_time": "开始时间：{{time}}",
+      "stay_tuned": "敬请期待！",
+      "connect_to_checkin": "连接钱包开始打卡",
+      "connect_to_checkin_desc": "连接你的钱包，开始每日凯格尔训练",
+      "leaderboard": "排行榜",
+      "how_to_participate": "如何参与",
+      "step1_title": "连接钱包",
+      "step1_desc": "使用 MetaMask 等钱包连接 BSC 网络",
+      "step2_title": "完成训练",
+      "step2_desc": "跟随指引完成凯格尔训练",
+      "step3_title": "每日打卡",
+      "step3_desc": "捐赠 UU 代币完成打卡",
+      "step4_title": "保持 Combo",
+      "step4_desc": "连续打卡累积 Combo，登上排行榜"
+    },
+    "checkin": {
+      "checked_in_today": "今日已打卡",
+      "current_combo": "当前 Combo",
+      "next_checkin_countdown": "下次打卡倒计时",
+      "can_checkin_at": "{{time}} 可打卡",
+      "combo_deadline": "Combo 接续截止",
+      "combo_deadline_hint": "在 {{time}} 前打卡可接续 Combo",
+      "start_training_today": "开始今日训练",
+      "complete_training_hint": "完成凯格尔训练后即可打卡",
+      "combo_plus_hint": "在 {{countdown}} 内完成打卡，Combo +1！",
+      "combo_broken": "Combo 已断裂，打卡将开始新的 Combo",
+      "start_training": "开始训练",
+      "training_complete": "训练完成！",
+      "combo_will_be": "打卡后 Combo 将变为 {{combo}}！",
+      "enter_donation": "输入捐赠数量完成打卡",
+      "donation_amount": "捐赠数量 (UU)",
+      "min_donation": "最低 1 UU",
+      "approving": "授权中...",
+      "approve_uu": "授权 UU",
+      "checking_in": "打卡中...",
+      "confirm_checkin": "确认打卡",
+      "checkin_success": "打卡成功！"
+    },
+    "leaderboard": {
+      "combo_streak": "Combo 连击",
+      "checkin_count": "打卡次数",
+      "donation_amount": "捐赠数量",
+      "streak": "连击",
+      "times": "次"
+    },
+    "stats": {
+      "my_data": "我的数据",
+      "current_combo": "当前 Combo",
+      "checkin_count": "打卡次数",
+      "total_donation": "捐赠总量",
+      "uu_balance": "UU 余额",
+      "total_pool": "累计捐赠池"
+    },
+    "training": {
+      "slow": "慢速训练",
+      "fast": "快速训练",
+      "endurance": "耐力训练",
+      "complete": "训练完成！",
+      "complete_desc": "恭喜你完成今天的凯格尔训练",
+      "continue_checkin": "继续打卡",
+      "preparing": "准备开始",
+      "preparing_desc": "训练即将开始，请做好准备",
+      "rest_time": "休息时间",
+      "entering": "准备进入 {{phase}}",
+      "round": "第 {{current}} / {{total}} 轮",
+      "prepare": "准备",
+      "rest": "休息",
+      "contract": "收紧",
+      "relax": "放松",
+      "continue": "继续",
+      "pause": "暂停"
+    }
+  }
+}

@@ -1,8 +1,12 @@
 "use client";
 
+import * as React from "react";
 import { useMachine } from "@xstate/react";
 import { setup, assign, fromCallback } from "xstate";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import styles from "./TrainingFlow.module.css";
+import useTrans from "@/hooks/useTrans";
 
 interface Props {
   onComplete: () => void;
@@ -11,7 +15,7 @@ interface Props {
 type TrainingPhase = "slow" | "fast" | "endurance";
 
 interface TrainingConfig {
-  name: string;
+  nameKey: string;
   contractTime: number;
   relaxTime: number;
   rounds: number;
@@ -19,19 +23,19 @@ interface TrainingConfig {
 
 const TRAINING_CONFIG: Record<TrainingPhase, TrainingConfig> = {
   slow: {
-    name: "慢速训练",
+    nameKey: "slow",
     contractTime: 3,
     relaxTime: 3,
     rounds: 10,
   },
   fast: {
-    name: "快速训练",
+    nameKey: "fast",
     contractTime: 1,
     relaxTime: 1,
     rounds: 15,
   },
   endurance: {
-    name: "耐力训练",
+    nameKey: "endurance",
     contractTime: 10,
     relaxTime: 10,
     rounds: 3,
@@ -40,6 +44,69 @@ const TRAINING_CONFIG: Record<TrainingPhase, TrainingConfig> = {
 
 const PHASE_ORDER: TrainingPhase[] = ["slow", "fast", "endurance"];
 const REST_TIME = 10;
+const PREPARE_TIME = 10;
+
+// 圆形进度条组件
+function CircularProgress({
+  progress,
+  isContract,
+  round,
+}: {
+  progress: number;
+  isContract: boolean;
+  round: number;
+}) {
+  const [animating, setAnimating] = React.useState(false);
+
+  React.useEffect(() => {
+    // 每一轮开始时重置动画
+    setAnimating(false);
+    const id = requestAnimationFrame(() => setAnimating(true));
+    return () => cancelAnimationFrame(id);
+  }, [round]);
+
+  const size = 320;
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  // 每轮开始时从 0 开始，然后动画到真实进度
+  const displayProgress = animating ? progress : 0;
+  const offset = circumference * (1 - displayProgress);
+
+  return (
+    <svg
+      className="absolute inset-0 -rotate-90"
+      width={size}
+      height={size}
+    >
+      {/* 背景圆环 */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        className="text-muted/30"
+      />
+      {/* 进度圆环 */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        className={`transition-all duration-1000 ease-linear ${
+          isContract ? "text-red-500" : "text-green-500"
+        }`}
+      />
+    </svg>
+  );
+}
 
 function getNextPhase(current: TrainingPhase): TrainingPhase | null {
   const idx = PHASE_ORDER.indexOf(current);
@@ -71,13 +138,33 @@ const trainingMachine = setup({
   },
 }).createMachine({
   id: "training",
-  initial: "running",
+  initial: "preparing",
   context: {
     trainingPhase: "slow",
     round: 1,
-    timeLeft: TRAINING_CONFIG.slow.contractTime,
+    timeLeft: PREPARE_TIME - 1,
   },
   states: {
+    preparing: {
+      invoke: {
+        id: "timer",
+        src: "timer",
+      },
+      on: {
+        TICK: [
+          {
+            guard: ({ context }) => context.timeLeft > 0,
+            actions: assign({ timeLeft: ({ context }) => context.timeLeft - 1 }),
+          },
+          {
+            target: "running",
+            actions: assign({
+              timeLeft: () => TRAINING_CONFIG.slow.contractTime - 1,
+            }),
+          },
+        ],
+      },
+    },
     running: {
       initial: "contract",
       invoke: {
@@ -89,13 +176,13 @@ const trainingMachine = setup({
           on: {
             TICK: [
               {
-                guard: ({ context }) => context.timeLeft > 1,
+                guard: ({ context }) => context.timeLeft > 0,
                 actions: assign({ timeLeft: ({ context }) => context.timeLeft - 1 }),
               },
               {
                 target: "relax",
                 actions: assign({
-                  timeLeft: ({ context }) => TRAINING_CONFIG[context.trainingPhase].relaxTime,
+                  timeLeft: ({ context }) => TRAINING_CONFIG[context.trainingPhase].relaxTime - 1,
                 }),
               },
             ],
@@ -105,7 +192,7 @@ const trainingMachine = setup({
           on: {
             TICK: [
               {
-                guard: ({ context }) => context.timeLeft > 1,
+                guard: ({ context }) => context.timeLeft > 0,
                 actions: assign({ timeLeft: ({ context }) => context.timeLeft - 1 }),
               },
               {
@@ -114,13 +201,13 @@ const trainingMachine = setup({
                 target: "contract",
                 actions: assign({
                   round: ({ context }) => context.round + 1,
-                  timeLeft: ({ context }) => TRAINING_CONFIG[context.trainingPhase].contractTime,
+                  timeLeft: ({ context }) => TRAINING_CONFIG[context.trainingPhase].contractTime - 1,
                 }),
               },
               {
                 guard: ({ context }) => getNextPhase(context.trainingPhase) !== null,
                 target: "rest",
-                actions: assign({ timeLeft: () => REST_TIME }),
+                actions: assign({ timeLeft: () => REST_TIME - 1 }),
               },
               { target: "#training.complete" },
             ],
@@ -130,7 +217,7 @@ const trainingMachine = setup({
           on: {
             TICK: [
               {
-                guard: ({ context }) => context.timeLeft > 1,
+                guard: ({ context }) => context.timeLeft > 0,
                 actions: assign({ timeLeft: ({ context }) => context.timeLeft - 1 }),
               },
               {
@@ -140,7 +227,7 @@ const trainingMachine = setup({
                   round: () => 1,
                   timeLeft: ({ context }) => {
                     const next = getNextPhase(context.trainingPhase)!;
-                    return TRAINING_CONFIG[next].contractTime;
+                    return TRAINING_CONFIG[next].contractTime - 1;
                   },
                 }),
               },
@@ -169,10 +256,12 @@ const trainingMachine = setup({
 
 export function TrainingFlow({ onComplete }: Props) {
   const [state, send] = useMachine(trainingMachine);
+  const { t } = useTrans("training");
 
   const { trainingPhase, round, timeLeft } = state.context;
   const isComplete = state.matches("complete");
   const isPaused = state.matches("paused");
+  const isPreparing = state.matches("preparing");
   const isRest = state.matches({ running: "rest" });
   const isContract = state.matches({ running: "contract" });
 
@@ -180,10 +269,10 @@ export function TrainingFlow({ onComplete }: Props) {
     return (
       <div className="bg-card rounded-lg p-8 text-center border">
         <div className="text-6xl mb-4">🎉</div>
-        <h3 className="text-2xl font-bold mb-2">训练完成！</h3>
-        <p className="text-muted-foreground mb-6">恭喜你完成今天的凯格尔训练</p>
+        <h3 className="text-2xl font-bold mb-2">{t("complete")}</h3>
+        <p className="text-muted-foreground mb-6">{t("complete_desc")}</p>
         <Button size="lg" onClick={onComplete}>
-          继续打卡
+          {t("continue_checkin")}
         </Button>
       </div>
     );
@@ -193,6 +282,7 @@ export function TrainingFlow({ onComplete }: Props) {
   const nextPhase = getNextPhase(trainingPhase);
 
   const getPhaseStatus = (p: TrainingPhase) => {
+    if (isPreparing) return "pending";
     const pIndex = PHASE_ORDER.indexOf(p);
     const currentIndex = PHASE_ORDER.indexOf(trainingPhase);
 
@@ -222,46 +312,79 @@ export function TrainingFlow({ onComplete }: Props) {
         })}
       </div>
 
-      {isRest ? (
+      {isPreparing ? (
         <>
-          <h3 className="text-xl font-semibold text-center mb-2">休息时间</h3>
+          <h3 className="text-xl font-semibold text-center mb-2">{t("preparing")}</h3>
           <p className="text-muted-foreground text-center mb-8">
-            准备进入 {nextPhase ? TRAINING_CONFIG[nextPhase].name : ""}
+            {t("preparing_desc")}
+          </p>
+        </>
+      ) : isRest ? (
+        <>
+          <h3 className="text-xl font-semibold text-center mb-2">{t("rest_time")}</h3>
+          <p className="text-muted-foreground text-center mb-8">
+            {t("entering", { phase: nextPhase ? t(TRAINING_CONFIG[nextPhase].nameKey) : "" })}
           </p>
         </>
       ) : (
         <>
-          <h3 className="text-xl font-semibold text-center mb-2">{config.name}</h3>
+          <h3 className="text-xl font-semibold text-center mb-2">{t(config.nameKey)}</h3>
           <p className="text-muted-foreground text-center mb-2">
-            第 {round} / {config.rounds} 轮
+            {t("round", { current: round, total: config.rounds })}
           </p>
         </>
       )}
 
       {/* Timer */}
       <div className="text-center mb-8">
-        <div
-          className={`w-40 h-40 mx-auto rounded-full flex items-center justify-center text-5xl font-bold transition-colors ${
-            isRest
-              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-              : isContract
-              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-          }`}
-        >
-          {timeLeft}
+        <div className="w-80 h-80 mx-auto relative">
+          {/* 圆形进度条 */}
+          <CircularProgress
+            progress={(() => {
+              if (isPreparing) {
+                return (PREPARE_TIME - timeLeft) / PREPARE_TIME;
+              }
+              if (isRest) return 0;
+              const totalRoundTime = config.contractTime + config.relaxTime;
+              // timeLeft 范围: contractTime-1 ~ 0，进度目标为下一秒结束时的位置
+              if (isContract) {
+                return (config.contractTime - timeLeft) / totalRoundTime;
+              } else {
+                return (config.contractTime + config.relaxTime - timeLeft) / totalRoundTime;
+              }
+            })()}
+            isContract={isContract}
+            round={isPreparing ? 0 : round}
+          />
+          {/* 图片容器 */}
+          <div className={`absolute inset-4 ${isContract ? styles.shaking : ""}`}>
+            <Image
+              src={isContract ? "/pp-0.png" : "/pp-1.png"}
+              alt={isContract ? t("contract") : t("relax")}
+              fill
+              className="object-contain"
+            />
+          </div>
+          {/* 倒计时数字 */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-6xl font-bold text-white drop-shadow-lg">
+              {timeLeft}
+            </span>
+          </div>
         </div>
         <p className="mt-4 text-lg font-medium">
-          {isRest ? "休息" : isContract ? "收紧" : "放松"}
+          {isPreparing ? t("prepare") : isRest ? t("rest") : isContract ? t("contract") : t("relax")}
         </p>
       </div>
 
       {/* Controls */}
-      <div className="flex justify-center gap-4">
-        <Button variant="outline" onClick={() => send({ type: "TOGGLE_PAUSE" })}>
-          {isPaused ? "继续" : "暂停"}
-        </Button>
-      </div>
+      {!isPreparing && (
+        <div className="flex justify-center gap-4">
+          <Button variant="outline" onClick={() => send({ type: "TOGGLE_PAUSE" })}>
+            {isPaused ? t("continue") : t("pause")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,22 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAccount, useReadContract } from "wagmi";
-import { ConnectWalletDialog } from "@/components/ConnectWalletDialog";
+import { useState } from "react";
+import { useReadContract, useDisconnect } from "wagmi";
 import { CheckInSection } from "@/components/CheckInSection";
 import { UserStats } from "@/components/UserStats";
 import { Leaderboard } from "@/components/Leaderboard";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DailyKegelABI } from "@/lib/abi/DailyKegel";
 import { CONTRACT_ADDRESS, TOKEN_ADDRESS } from "@/lib/config";
+import System from "@/stores/system";
+import Web3 from "@/stores/web3";
+import { Globe, Check } from "lucide-react";
+import useTrans from "@/hooks/useTrans";
+
+function shortenAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
 
 export default function HomePage() {
-  const { isConnected, address } = useAccount();
+  const { isConnected, connectedAddress } = Web3.useContainer();
+  const { isClient, openWalletConnectDialog } = System.useContainer();
+  const { disconnect } = useDisconnect();
+  const { t, tCommon, changeLocale, locale } = useTrans("home");
   const [trainingCompleted, setTrainingCompleted] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // 读取合约 startTime
   const { data: startTime } = useReadContract({
@@ -33,7 +45,7 @@ export default function HomePage() {
   // 格式化开始时间
   const formatStartTime = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) * 1000);
-    return date.toLocaleString("zh-CN", {
+    return date.toLocaleString(locale === "zh" ? "zh-CN" : "en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -43,29 +55,68 @@ export default function HomePage() {
   };
 
   // 防止 hydration 问题
-  if (!mounted) {
+  if (!isClient) {
     return null;
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <main className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="flex items-center justify-between mb-8">
           <h1 className="text-2xl md:text-3xl font-bold">DailyKegel</h1>
-          <ConnectWalletDialog />
+          <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Globe className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => changeLocale("zh")} className="flex items-center justify-between">
+                  中文
+                  {locale === "zh" && <Check className="h-4 w-4 ml-2" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLocale("en")} className="flex items-center justify-between">
+                  English
+                  {locale === "en" && <Check className="h-4 w-4 ml-2" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Wallet Connect */}
+            {isConnected && connectedAddress ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    {shortenAddress(connectedAddress)}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => disconnect()}>
+                    {tCommon("disconnect")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button onClick={openWalletConnectDialog}>
+                {tCommon("connect_wallet")}
+              </Button>
+            )}
+          </div>
         </header>
 
         {/* Hero Section */}
         <section className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            每日凯格尔运动
+            {t("title")}
           </h2>
           <p className="text-lg text-muted-foreground mb-2">
-            锻炼盆底肌群，增强身体健康
+            {t("subtitle")}
           </p>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            完成训练后打卡，积累 Combo 连击，登上排行榜！
+            {t("description")}
           </p>
         </section>
 
@@ -73,9 +124,11 @@ export default function HomePage() {
         {!configValid && (
           <section className="mb-8">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-2">配置未完成</h3>
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                {t("config_incomplete")}
+              </h3>
               <p className="text-yellow-700">
-                请在 .env 文件中配置 NEXT_PUBLIC_CONTRACT_ADDRESS
+                {t("config_incomplete_desc")}
               </p>
             </div>
           </section>
@@ -85,12 +138,14 @@ export default function HomePage() {
         {configValid && !hasStarted && startTime && (
           <section className="mb-8">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-              <h3 className="text-xl font-semibold text-blue-800 mb-2">活动即将开始</h3>
+              <h3 className="text-xl font-semibold text-blue-800 mb-2">
+                {t("event_coming_soon")}
+              </h3>
               <p className="text-blue-700 mb-4">
-                开始时间：{formatStartTime(startTime)}
+                {t("start_time", { time: formatStartTime(startTime) })}
               </p>
               <p className="text-blue-600 text-sm">
-                敬请期待！
+                {t("stay_tuned")}
               </p>
             </div>
           </section>
@@ -103,11 +158,15 @@ export default function HomePage() {
             {!isConnected ? (
               <section className="mb-12">
                 <div className="bg-card rounded-lg p-12 text-center border">
-                  <h3 className="text-xl font-semibold mb-4">连接钱包开始打卡</h3>
+                  <h3 className="text-xl font-semibold mb-4">
+                    {t("connect_to_checkin")}
+                  </h3>
                   <p className="text-muted-foreground mb-6">
-                    连接你的钱包，开始每日凯格尔训练
+                    {t("connect_to_checkin_desc")}
                   </p>
-                  <ConnectWalletDialog />
+                  <Button size="lg" onClick={openWalletConnectDialog}>
+                    {tCommon("connect_wallet")}
+                  </Button>
                 </div>
               </section>
             ) : (
@@ -134,7 +193,9 @@ export default function HomePage() {
 
             {/* 排行榜 */}
             <section>
-              <h2 className="text-2xl font-bold text-center mb-6">排行榜</h2>
+              <h2 className="text-2xl font-bold text-center mb-6">
+                {t("leaderboard")}
+              </h2>
               <Leaderboard contractAddress={CONTRACT_ADDRESS} />
             </section>
           </>
@@ -143,34 +204,36 @@ export default function HomePage() {
         {/* How it works (当配置有效时始终显示) */}
         {configValid && (
           <section className="mt-16 mb-8">
-            <h2 className="text-2xl font-bold text-center mb-8">如何参与</h2>
+            <h2 className="text-2xl font-bold text-center mb-8">
+              {t("how_to_participate")}
+            </h2>
             <div className="grid md:grid-cols-4 gap-6">
               <div className="bg-card rounded-lg p-6 text-center border">
                 <div className="text-3xl mb-3">1</div>
-                <h3 className="font-semibold mb-2">连接钱包</h3>
+                <h3 className="font-semibold mb-2">{t("step1_title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  使用 MetaMask 等钱包连接 BSC 网络
+                  {t("step1_desc")}
                 </p>
               </div>
               <div className="bg-card rounded-lg p-6 text-center border">
                 <div className="text-3xl mb-3">2</div>
-                <h3 className="font-semibold mb-2">完成训练</h3>
+                <h3 className="font-semibold mb-2">{t("step2_title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  跟随指引完成凯格尔训练
+                  {t("step2_desc")}
                 </p>
               </div>
               <div className="bg-card rounded-lg p-6 text-center border">
                 <div className="text-3xl mb-3">3</div>
-                <h3 className="font-semibold mb-2">每日打卡</h3>
+                <h3 className="font-semibold mb-2">{t("step3_title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  捐赠 UU 代币完成打卡
+                  {t("step3_desc")}
                 </p>
               </div>
               <div className="bg-card rounded-lg p-6 text-center border">
                 <div className="text-3xl mb-3">4</div>
-                <h3 className="font-semibold mb-2">保持 Combo</h3>
+                <h3 className="font-semibold mb-2">{t("step4_title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  连续打卡累积 Combo，登上排行榜
+                  {t("step4_desc")}
                 </p>
               </div>
             </div>

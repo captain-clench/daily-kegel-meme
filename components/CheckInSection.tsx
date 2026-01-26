@@ -7,6 +7,7 @@ import { DailyKegelABI } from "@/lib/abi/DailyKegel";
 import { ERC20ABI } from "@/lib/abi/ERC20";
 import { Button } from "@/components/ui/button";
 import { TrainingFlow } from "@/components/TrainingFlow";
+import useTrans from "@/hooks/useTrans";
 
 interface Props {
   contractAddress: `0x${string}`;
@@ -16,9 +17,9 @@ interface Props {
 }
 
 // 格式化时间显示
-function formatDateTime(timestamp: number) {
+function formatDateTime(timestamp: number, locale: string) {
   const date = new Date(timestamp * 1000);
-  return date.toLocaleString("zh-CN", {
+  return date.toLocaleString(locale === "zh" ? "zh-CN" : "en-US", {
     month: "long",
     day: "numeric",
     hour: "2-digit",
@@ -41,6 +42,7 @@ export function CheckInSection({
   onTrainingComplete,
 }: Props) {
   const { address } = useAccount();
+  const { t, locale } = useTrans("checkin");
   const [donationAmount, setDonationAmount] = useState("1");
   const [isTraining, setIsTraining] = useState(false);
 
@@ -181,23 +183,23 @@ export function CheckInSection({
   if (!canCheckIn && cooldownCountdown) {
     return (
       <div className="bg-card rounded-lg p-8 text-center border">
-        <h3 className="text-xl font-semibold mb-2">今日已打卡</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("checked_in_today")}</h3>
 
         {/* 当前 Combo */}
         {currentCombo > 0n && (
           <div className="mb-4">
-            <span className="text-sm text-muted-foreground">当前 Combo</span>
+            <span className="text-sm text-muted-foreground">{t("current_combo")}</span>
             <p className="text-3xl font-bold text-primary">{currentCombo.toString()}</p>
           </div>
         )}
 
         {/* 下次打卡倒计时 */}
         <div className="mb-4">
-          <p className="text-sm text-muted-foreground mb-1">下次打卡倒计时</p>
+          <p className="text-sm text-muted-foreground mb-1">{t("next_checkin_countdown")}</p>
           <p className="text-4xl font-mono font-bold">{cooldownCountdown}</p>
           {nextCheckinTime && (
             <p className="text-xs text-muted-foreground mt-1">
-              {formatDateTime(Number(nextCheckinTime))} 可打卡
+              {t("can_checkin_at", { time: formatDateTime(Number(nextCheckinTime), locale) })}
             </p>
           )}
         </div>
@@ -206,14 +208,14 @@ export function CheckInSection({
         {isInComboWindow && comboCountdown && (
           <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
             <p className="text-sm text-green-700 dark:text-green-300 mb-1">
-              Combo 接续截止
+              {t("combo_deadline")}
             </p>
             <p className="text-2xl font-mono font-bold text-green-600 dark:text-green-400">
               {comboCountdown}
             </p>
             {comboDeadline && (
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                在 {formatDateTime(Number(comboDeadline))} 前打卡可接续 Combo
+                {t("combo_deadline_hint", { time: formatDateTime(Number(comboDeadline), locale) })}
               </p>
             )}
           </div>
@@ -237,20 +239,20 @@ export function CheckInSection({
 
     return (
       <div className="bg-card rounded-lg p-8 text-center border">
-        <h3 className="text-xl font-semibold mb-2">开始今日训练</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("start_training_today")}</h3>
         <p className="text-muted-foreground mb-4">
-          完成凯格尔训练后即可打卡
+          {t("complete_training_hint")}
         </p>
 
         {/* Combo 提示 */}
         {hasCheckedInBefore && isInComboWindow && (
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
             <p className="text-sm text-green-700 dark:text-green-300">
-              当前 Combo: <span className="font-bold">{currentCombo.toString()}</span>
+              {t("current_combo")}: <span className="font-bold">{currentCombo.toString()}</span>
             </p>
             {comboCountdown && (
               <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                在 {comboCountdown} 内完成打卡，Combo +1！
+                {t("combo_plus_hint", { countdown: comboCountdown })}
               </p>
             )}
           </div>
@@ -259,13 +261,13 @@ export function CheckInSection({
         {hasCheckedInBefore && !isInComboWindow && (
           <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
             <p className="text-sm text-orange-700 dark:text-orange-300">
-              Combo 已断裂，打卡将开始新的 Combo
+              {t("combo_broken")}
             </p>
           </div>
         )}
 
         <Button size="lg" onClick={() => setIsTraining(true)}>
-          开始训练
+          {t("start_training")}
         </Button>
       </div>
     );
@@ -275,16 +277,16 @@ export function CheckInSection({
   if (trainingCompleted && canCheckIn) {
     return (
       <div className="bg-card rounded-lg p-8 border">
-        <h3 className="text-xl font-semibold mb-4 text-center">训练完成！</h3>
+        <h3 className="text-xl font-semibold mb-4 text-center">{t("training_complete")}</h3>
 
         {/* Combo 提示 */}
         {hasCheckedInBefore && isInComboWindow && (
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
             <p className="text-sm text-green-700 dark:text-green-300">
-              当前 Combo: <span className="font-bold">{currentCombo.toString()}</span>
+              {t("current_combo")}: <span className="font-bold">{currentCombo.toString()}</span>
             </p>
             <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-              打卡后 Combo 将变为 {(currentCombo + 1n).toString()}！
+              {t("combo_will_be", { combo: (currentCombo + 1n).toString() })}
             </p>
           </div>
         )}
@@ -292,19 +294,19 @@ export function CheckInSection({
         {hasCheckedInBefore && !isInComboWindow && (
           <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg text-center">
             <p className="text-sm text-orange-700 dark:text-orange-300">
-              Combo 已断裂，打卡将开始新的 Combo
+              {t("combo_broken")}
             </p>
           </div>
         )}
 
         <p className="text-muted-foreground text-center mb-6">
-          输入捐赠数量完成打卡
+          {t("enter_donation")}
         </p>
 
         <div className="max-w-xs mx-auto space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">
-              捐赠数量 (UU)
+              {t("donation_amount")}
             </label>
             <input
               type="number"
@@ -315,7 +317,7 @@ export function CheckInSection({
               className="w-full px-4 py-2 rounded-lg border bg-background"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              最低 1 UU
+              {t("min_donation")}
             </p>
           </div>
 
@@ -325,7 +327,7 @@ export function CheckInSection({
               onClick={handleApprove}
               disabled={isApproving || isApproveConfirming}
             >
-              {isApproving || isApproveConfirming ? "授权中..." : "授权 UU"}
+              {isApproving || isApproveConfirming ? t("approving") : t("approve_uu")}
             </Button>
           ) : (
             <Button
@@ -333,13 +335,13 @@ export function CheckInSection({
               onClick={handleCheckIn}
               disabled={isCheckingIn || isCheckInConfirming || Number(donationAmount) < 1}
             >
-              {isCheckingIn || isCheckInConfirming ? "打卡中..." : "确认打卡"}
+              {isCheckingIn || isCheckInConfirming ? t("checking_in") : t("confirm_checkin")}
             </Button>
           )}
         </div>
 
         {isCheckInSuccess && (
-          <p className="text-center text-green-600 mt-4">打卡成功！</p>
+          <p className="text-center text-green-600 mt-4">{t("checkin_success")}</p>
         )}
       </div>
     );

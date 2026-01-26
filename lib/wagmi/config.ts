@@ -10,6 +10,9 @@ export const config = createConfig({
   },
 });
 
+// active chain is bsc testnet when DEV env
+export const activeChain = process.env.NODE_ENV === "development" ? bscTestnet : bsc;
+
 declare module "wagmi" {
   interface Register {
     config: typeof config;

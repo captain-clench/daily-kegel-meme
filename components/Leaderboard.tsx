@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useReadContract } from "wagmi";
 import { DailyKegelABI } from "@/lib/abi/DailyKegel";
 import { formatUnits } from "viem";
+import useTrans from "@/hooks/useTrans";
 
 interface Props {
   contractAddress: `0x${string}`;
@@ -22,6 +23,7 @@ type ComboEntry = {
 
 export function Leaderboard({ contractAddress }: Props) {
   const [tab, setTab] = useState<"combo" | "checkin" | "donation">("combo");
+  const { t, tCommon } = useTrans("leaderboard");
 
   const { data: checkinLeaderboard } = useReadContract({
     address: contractAddress,
@@ -66,7 +68,7 @@ export function Leaderboard({ contractAddress }: Props) {
               : "bg-muted hover:bg-muted/80"
           }`}
         >
-          Combo 连击
+          {t("combo_streak")}
         </button>
         <button
           onClick={() => setTab("checkin")}
@@ -76,7 +78,7 @@ export function Leaderboard({ contractAddress }: Props) {
               : "bg-muted hover:bg-muted/80"
           }`}
         >
-          打卡次数
+          {t("checkin_count")}
         </button>
         <button
           onClick={() => setTab("donation")}
@@ -86,7 +88,7 @@ export function Leaderboard({ contractAddress }: Props) {
               : "bg-muted hover:bg-muted/80"
           }`}
         >
-          捐赠数量
+          {t("donation_amount")}
         </button>
       </div>
 
@@ -94,7 +96,7 @@ export function Leaderboard({ contractAddress }: Props) {
       {tab === "combo" && (
         <>
           {filteredCombo.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">暂无数据</p>
+            <p className="text-center text-muted-foreground py-8">{tCommon("no_data")}</p>
           ) : (
             <div className="space-y-2">
               {filteredCombo.map((entry, index) => (
@@ -127,7 +129,7 @@ export function Leaderboard({ contractAddress }: Props) {
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-lg">{entry.comboCount.toString()}</span>
-                    <span className="text-sm text-muted-foreground ml-1">连击</span>
+                    <span className="text-sm text-muted-foreground ml-1">{t("streak")}</span>
                   </div>
                 </div>
               ))}
@@ -140,7 +142,7 @@ export function Leaderboard({ contractAddress }: Props) {
       {tab === "checkin" && (
         <>
           {filteredCheckin.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">暂无数据</p>
+            <p className="text-center text-muted-foreground py-8">{tCommon("no_data")}</p>
           ) : (
             <div className="space-y-2">
               {filteredCheckin.map((entry, index) => (
@@ -168,7 +170,7 @@ export function Leaderboard({ contractAddress }: Props) {
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-lg">{entry.value.toString()}</span>
-                    <span className="text-sm text-muted-foreground ml-1">次</span>
+                    <span className="text-sm text-muted-foreground ml-1">{t("times")}</span>
                   </div>
                 </div>
               ))}
@@ -181,7 +183,7 @@ export function Leaderboard({ contractAddress }: Props) {
       {tab === "donation" && (
         <>
           {filteredDonation.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">暂无数据</p>
+            <p className="text-center text-muted-foreground py-8">{tCommon("no_data")}</p>
           ) : (
             <div className="space-y-2">
               {filteredDonation.map((entry, index) => (
