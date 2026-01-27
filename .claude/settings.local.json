@@ -4,7 +4,9 @@
       "Bash(ls:*)",
       "Bash(tree:*)",
       "Bash(npx hardhat:*)",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx tsc:*)",
+      "Bash(yarn build:*)"
     ]
   }
 }

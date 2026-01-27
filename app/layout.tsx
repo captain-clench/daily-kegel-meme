@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Architects_Daughter } from "next/font/google";
+import { Geist, Geist_Mono, Schoolbell, ZCOOL_KuaiLe } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { WalletConnectDialog } from "@/components/WalletConnectDialog";
 
-const libreBaskerville = Architects_Daughter({
+const libreBaskerville = Schoolbell({
   variable: "--font-sans",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const zcoolKuaiLe = ZCOOL_KuaiLe({
+  variable: "--font-zcool-kuaile",
   subsets: ["latin"],
   weight: "400",
 });
@@ -34,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body
-        className={`${libreBaskerville.variable} antialiased`}
+        className={`${libreBaskerville.variable} ${zcoolKuaiLe.variable} antialiased`}
       >
         <Providers>
           {children}

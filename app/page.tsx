@@ -18,6 +18,8 @@ import System from "@/stores/system";
 import Web3 from "@/stores/web3";
 import { Globe, Check } from "lucide-react";
 import useTrans from "@/hooks/useTrans";
+import Image from "next/image";
+import styles from "./page.module.scss";
 
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -60,11 +62,11 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen">
+    <main className={`min-h-screen ${styles.animatedBg}`}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold">DailyKegel</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Captain Clench</h1>
           <div className="flex items-center gap-2">
             {/* Language Switcher */}
             <DropdownMenu>
@@ -108,14 +110,21 @@ export default function HomePage() {
         </header>
 
         {/* Hero Section */}
-        <section className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+        <section className="text-center mb-20">
+          <Image
+            src="/logo.png"
+            alt="Captain Clench"
+            width={200}
+            height={200}
+            className="mx-auto mb-6 w-auto h-32 md:h-56"
+          />
+          <h2 className={`text-3xl md:text-7xl font-bold mb-4 ${styles.titleShadow}`}>
             {t("title")}
           </h2>
-          <p className="text-lg text-muted-foreground mb-2">
+          <p className={`text-2lg md:text-3xl text-muted-foreground mb-2 ${styles.titleShadow}`}>
             {t("subtitle")}
           </p>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className={`text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto ${styles.titleShadow}`}>
             {t("description")}
           </p>
         </section>
@@ -170,25 +179,27 @@ export default function HomePage() {
                 </div>
               </section>
             ) : (
-              <>
-                {/* 用户数据 */}
-                <section className="mb-8">
-                  <UserStats
-                    contractAddress={CONTRACT_ADDRESS}
-                    tokenAddress={TOKEN_ADDRESS}
-                  />
-                </section>
+              <section className="mb-12 max-w-[1200px] mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                  {/* 用户数据 */}
+                  <div className="lg:col-span-2">
+                    <UserStats
+                      contractAddress={CONTRACT_ADDRESS}
+                      tokenAddress={TOKEN_ADDRESS}
+                    />
+                  </div>
 
-                {/* 打卡区域 */}
-                <section className="mb-12">
-                  <CheckInSection
-                    contractAddress={CONTRACT_ADDRESS}
-                    tokenAddress={TOKEN_ADDRESS}
-                    trainingCompleted={trainingCompleted}
-                    onTrainingComplete={() => setTrainingCompleted(true)}
-                  />
-                </section>
-              </>
+                  {/* 打卡区域 */}
+                  <div className="lg:col-span-8">
+                    <CheckInSection
+                      contractAddress={CONTRACT_ADDRESS}
+                      tokenAddress={TOKEN_ADDRESS}
+                      trainingCompleted={trainingCompleted}
+                      onTrainingComplete={() => setTrainingCompleted(true)}
+                    />
+                  </div>
+                </div>
+              </section>
             )}
 
             {/* 排行榜 */}

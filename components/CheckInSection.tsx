@@ -6,6 +6,7 @@ import { parseUnits } from "viem";
 import { DailyKegelABI } from "@/lib/abi/DailyKegel";
 import { ERC20ABI } from "@/lib/abi/ERC20";
 import { Button } from "@/components/ui/button";
+import { RoughCard } from "@/components/ui/rough-card";
 import { TrainingFlow } from "@/components/TrainingFlow";
 import useTrans from "@/hooks/useTrans";
 
@@ -44,7 +45,6 @@ export function CheckInSection({
   const { address } = useAccount();
   const { t, locale } = useTrans("checkin");
   const [donationAmount, setDonationAmount] = useState("1");
-  const [isTraining, setIsTraining] = useState(false);
 
   const { data: canCheckIn, refetch: refetchCanCheckIn } = useReadContract({
     address: contractAddress,
@@ -182,7 +182,7 @@ export function CheckInSection({
   // 如果在冷却时间内，显示倒计时
   if (!canCheckIn && cooldownCountdown) {
     return (
-      <div className="bg-card rounded-lg p-8 text-center border">
+      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
         <h3 className="text-xl font-semibold mb-2">{t("checked_in_today")}</h3>
 
         {/* 当前 Combo */}
@@ -220,63 +220,27 @@ export function CheckInSection({
             )}
           </div>
         )}
-      </div>
+      </RoughCard>
     );
   }
 
-  // 如果可以打卡且训练未完成，显示训练入口
+  // 如果可以打卡且训练未完成，显示训练组件
   if (!trainingCompleted && canCheckIn) {
-    if (isTraining) {
-      return (
-        <TrainingFlow
-          onComplete={() => {
-            setIsTraining(false);
-            onTrainingComplete();
-          }}
-        />
-      );
-    }
-
     return (
-      <div className="bg-card rounded-lg p-8 text-center border">
-        <h3 className="text-xl font-semibold mb-2">{t("start_training_today")}</h3>
-        <p className="text-muted-foreground mb-4">
-          {t("complete_training_hint")}
-        </p>
-
-        {/* Combo 提示 */}
-        {hasCheckedInBefore && isInComboWindow && (
-          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-            <p className="text-sm text-green-700 dark:text-green-300">
-              {t("current_combo")}: <span className="font-bold">{currentCombo.toString()}</span>
-            </p>
-            {comboCountdown && (
-              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                {t("combo_plus_hint", { countdown: comboCountdown })}
-              </p>
-            )}
-          </div>
-        )}
-
-        {hasCheckedInBefore && !isInComboWindow && (
-          <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
-            <p className="text-sm text-orange-700 dark:text-orange-300">
-              {t("combo_broken")}
-            </p>
-          </div>
-        )}
-
-        <Button size="lg" onClick={() => setIsTraining(true)}>
-          {t("start_training")}
-        </Button>
-      </div>
+      <TrainingFlow
+        onComplete={onTrainingComplete}
+        currentCombo={currentCombo}
+        hasCheckedInBefore={hasCheckedInBefore}
+        isInComboWindow={!!isInComboWindow}
+        comboCountdown={comboCountdown}
+      />
     );
   }
 
   // 训练完成，显示打卡表单
   if (trainingCompleted && canCheckIn) {
     return (
-      <div className="bg-card rounded-lg p-8 border">
+      <RoughCard className="p-8 h-full" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#c5ddff', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
         <h3 className="text-xl font-semibold mb-4 text-center">{t("training_complete")}</h3>
 
         {/* Combo 提示 */}
@@ -343,7 +307,7 @@ export function CheckInSection({
         {isCheckInSuccess && (
           <p className="text-center text-green-600 mt-4">{t("checkin_success")}</p>
         )}
-      </div>
+      </RoughCard>
     );
   }
 

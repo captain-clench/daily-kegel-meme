@@ -4,12 +4,17 @@ import * as React from "react";
 import { useMachine } from "@xstate/react";
 import { setup, assign, fromCallback } from "xstate";
 import { Button } from "@/components/ui/button";
+import { RoughCard } from "@/components/ui/rough-card";
 import Image from "next/image";
 import styles from "./TrainingFlow.module.css";
 import useTrans from "@/hooks/useTrans";
 
 interface Props {
   onComplete: () => void;
+  currentCombo?: bigint;
+  hasCheckedInBefore?: boolean;
+  isInComboWindow?: boolean;
+  comboCountdown?: string;
 }
 
 type TrainingPhase = "slow" | "fast" | "endurance";
@@ -131,20 +136,25 @@ const timerActor = fromCallback(({ sendBack }) => {
 const trainingMachine = setup({
   types: {
     context: {} as Context,
-    events: {} as { type: "TICK" } | { type: "TOGGLE_PAUSE" },
+    events: {} as { type: "TICK" } | { type: "TOGGLE_PAUSE" } | { type: "START" },
   },
   actors: {
     timer: timerActor,
   },
 }).createMachine({
   id: "training",
-  initial: "preparing",
+  initial: "idle",
   context: {
     trainingPhase: "slow",
     round: 1,
     timeLeft: PREPARE_TIME - 1,
   },
   states: {
+    idle: {
+      on: {
+        START: "preparing",
+      },
+    },
     preparing: {
       invoke: {
         id: "timer",
@@ -254,27 +264,73 @@ const trainingMachine = setup({
   },
 });
 
-export function TrainingFlow({ onComplete }: Props) {
+export function TrainingFlow({
+  onComplete,
+  currentCombo = 0n,
+  hasCheckedInBefore = false,
+  isInComboWindow = false,
+  comboCountdown = "",
+}: Props) {
   const [state, send] = useMachine(trainingMachine);
   const { t } = useTrans("training");
+  const { t: tCheckin } = useTrans("checkin");
 
   const { trainingPhase, round, timeLeft } = state.context;
+  const isIdle = state.matches("idle");
   const isComplete = state.matches("complete");
   const isPaused = state.matches("paused");
   const isPreparing = state.matches("preparing");
   const isRest = state.matches({ running: "rest" });
   const isContract = state.matches({ running: "contract" });
 
+  // Idle 状态：显示开始训练入口
+  if (isIdle) {
+    return (
+      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
+        <h3 className="text-xl font-semibold mb-2">{tCheckin("start_training_today")}</h3>
+        <p className="text-muted-foreground mb-4">
+          {tCheckin("complete_training_hint")}
+        </p>
+
+        {/* Combo 提示 */}
+        {hasCheckedInBefore && isInComboWindow && (
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+            <p className="text-sm text-green-700 dark:text-green-300">
+              {tCheckin("current_combo")}: <span className="font-bold">{currentCombo.toString()}</span>
+            </p>
+            {comboCountdown && (
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                {tCheckin("combo_plus_hint", { countdown: comboCountdown })}
+              </p>
+            )}
+          </div>
+        )}
+
+        {hasCheckedInBefore && !isInComboWindow && (
+          <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
+            <p className="text-sm text-orange-700 dark:text-orange-300">
+              {tCheckin("combo_broken")}
+            </p>
+          </div>
+        )}
+
+        <Button size="lg" onClick={() => send({ type: "START" })}>
+          {tCheckin("start_training")}
+        </Button>
+      </RoughCard>
+    );
+  }
+
   if (isComplete) {
     return (
-      <div className="bg-card rounded-lg p-8 text-center border">
+      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
         <div className="text-6xl mb-4">🎉</div>
         <h3 className="text-2xl font-bold mb-2">{t("complete")}</h3>
         <p className="text-muted-foreground mb-6">{t("complete_desc")}</p>
         <Button size="lg" onClick={onComplete}>
           {t("continue_checkin")}
         </Button>
-      </div>
+      </RoughCard>
     );
   }
 
@@ -292,7 +348,7 @@ export function TrainingFlow({ onComplete }: Props) {
   };
 
   return (
-    <div className="bg-card rounded-lg p-8 border">
+    <RoughCard className="p-8 h-full" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#c5ddff', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={200}  solidBackgroundFill="#ffefefc9">
       {/* Phase indicator */}
       <div className="flex justify-center gap-2 mb-8">
         {PHASE_ORDER.map((p) => {
@@ -359,8 +415,8 @@ export function TrainingFlow({ onComplete }: Props) {
           {/* 图片容器 */}
           <div className={`absolute inset-4 ${isContract ? styles.shaking : ""}`}>
             <Image
-              src={isContract ? "/pp-0.png" : "/pp-1.png"}
-              alt={isContract ? t("contract") : t("relax")}
+              src={isPreparing ? "/pp-3.png" : isContract ? "/pp-0.png" : "/pp-1.png"}
+              alt={isPreparing ? t("prepare") : isContract ? t("contract") : t("relax")}
               fill
               className="object-contain"
             />
@@ -385,6 +441,6 @@ export function TrainingFlow({ onComplete }: Props) {
           </Button>
         </div>
       )}
-    </div>
+    </RoughCard>
   );
 }
