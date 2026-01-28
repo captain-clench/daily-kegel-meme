@@ -214,3 +214,17 @@ DATABASE_USER=root
 DATABASE_PASSWORD=xxx
 DATABASE_NAME=captain_clench
 ```
+
+## Warmup Mode (预热模式)
+
+当 `NEXT_PUBLIC_CONTRACT_ADDRESS` 或 `NEXT_PUBLIC_TOKEN_ADDRESS` 任一未配置时，自动进入预热模式。
+
+**预热模式下的页面表现：**
+- 显示 "COMING SOON" RoughCard（带抖动动画 + pp-3.png 图片）
+- 隐藏主流程（连接钱包提示、用户数据、打卡区域）
+- 排行榜正常显示（无数据时显示"暂无数据"）
+- 玩法介绍正常显示
+
+**相关代码：**
+- `app/page.tsx` - `isWarmupMode` 变量控制预热状态
+- `components/Leaderboard.tsx` - `contractAddress` 为可选参数，支持预热模式
