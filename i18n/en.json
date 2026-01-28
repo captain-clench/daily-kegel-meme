@@ -85,8 +85,8 @@
       "title_combo": "Web3's Most Hard",
       "title_checkin": "Web3's Most Persistent",
       "title_donation": "Web3's Most Generous",
-      "champion_desc_combo": "#1 Combo · {{count}} streak",
-      "champion_desc_checkin": "#1 Check-in · {{count}} times",
+      "champion_desc_combo": "#1 Combo · {{value}} streak",
+      "champion_desc_checkin": "#1 Check-in · {{value}} times",
       "champion_desc_donation": "#1 Donation · {{amount}} UU"
     },
     "stats": {

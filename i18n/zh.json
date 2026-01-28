@@ -85,8 +85,8 @@
       "title_combo": "Web3 第一坚硬",
       "title_checkin": "Web3 第一持久",
       "title_donation": "Web3 第一慷慨",
-      "champion_desc_combo": "#1 连击榜 · {{count}} 连击",
-      "champion_desc_checkin": "#1 打卡榜 · {{count}} 次",
+      "champion_desc_combo": "#1 连击榜 · {{value}} 连击",
+      "champion_desc_checkin": "#1 打卡榜 · {{value}} 次",
       "champion_desc_donation": "#1 捐赠榜 · {{amount}} UU"
     },
     "stats": {

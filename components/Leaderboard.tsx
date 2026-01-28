@@ -335,7 +335,7 @@ export function Leaderboard({ contractAddress }: Props) {
                 </p>
               )}
               <p className="text-xs text-muted-foreground mt-2">
-                {t("champion_desc_combo", { count: comboChampion.comboCount.toString() })}
+                {t("champion_desc_combo", { value: comboChampion.comboCount.toString() })}
               </p>
             </RoughCard>
           )}
@@ -356,7 +356,7 @@ export function Leaderboard({ contractAddress }: Props) {
                 </p>
               )}
               <p className="text-xs text-muted-foreground mt-2">
-                {t("champion_desc_checkin", { count: checkinChampion.value.toString() })}
+                {t("champion_desc_checkin", { value: checkinChampion.value.toString() })}
               </p>
             </RoughCard>
           )}
