@@ -84,11 +84,14 @@ contract DailyKegel {
     // ============ 构造函数 ============
     constructor(
         address _uuToken,
-        uint256 _startTime
+        uint256 _startTime,
+        uint256 _cooldown
     ) {
+        require(_cooldown > 0, "DailyKegel: cooldown must be positive");
         admin = msg.sender;
         uuToken = UUToken(_uuToken);
         startTime = _startTime;
+        cooldown = _cooldown;
     }
 
     // ============ 用户功能 ============

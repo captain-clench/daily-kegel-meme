@@ -7,29 +7,10 @@ datasource db {
   provider = "mysql"
 }
 
-model Season {
-  id              Int          @id @default(autoincrement())
-  name            String       @unique // 如 "season1"
-  displayName     String       // 显示名称，如 "第一赛季"
-  contractAddress String       // 合约地址
-  tokenAddress    String       // UU 代币地址
-  chainId         Int          // 链 ID
-  startTime       DateTime     @db.Timestamp(0)
-  endTime         DateTime     @db.Timestamp(0)
-  active          Boolean      @default(true)
-  createdAt       DateTime     @default(now()) @db.Timestamp(0)
-  updatedAt       DateTime     @updatedAt @db.Timestamp(0)
-  merkleData      MerkleData[]
-}
-
-model MerkleData {
+model Quote {
   id        Int      @id @default(autoincrement())
-  seasonId  Int
-  season    Season   @relation(fields: [seasonId], references: [id])
-  address   String   // 用户地址
-  amount    String   // 可 claim 数量
-  proof     Json     // Merkle proof
+  address   String   @unique @db.VarChar(42)
+  quote     String   @db.Text
   createdAt DateTime @default(now()) @db.Timestamp(0)
-
-  @@unique([seasonId, address])
+  updatedAt DateTime @updatedAt @db.Timestamp(0)
 }

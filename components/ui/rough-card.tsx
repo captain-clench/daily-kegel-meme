@@ -43,9 +43,9 @@ function RoughCard({
   children,
   roughOptions,
   padding = 2,
-  animate = false,
-  animateInterval = 150,
-  solidBackgroundFill,
+  animate = true,
+  animateInterval = 200,
+  solidBackgroundFill = '#ffefefec',
   ...props
 }: RoughCardProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -146,7 +146,7 @@ function RoughCard({
         style={{ zIndex: 0 }}
       />
       {/* Content */}
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 h-full flex flex-col items-center justify-center">{children}</div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useReadContract, useDisconnect } from "wagmi";
 import { CheckInSection } from "@/components/CheckInSection";
 import { UserStats } from "@/components/UserStats";
 import { Leaderboard } from "@/components/Leaderboard";
+import { RoughCard } from "@/components/ui/rough-card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -165,8 +166,8 @@ export default function HomePage() {
           <>
             {/* 未连接钱包 */}
             {!isConnected ? (
-              <section className="mb-12">
-                <div className="bg-card rounded-lg p-12 text-center border">
+              <section className="mb-12 max-w-[1200px] mx-auto">
+                <RoughCard className="p-12 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
                   <h3 className="text-xl font-semibold mb-4">
                     {t("connect_to_checkin")}
                   </h3>
@@ -176,7 +177,7 @@ export default function HomePage() {
                   <Button size="lg" onClick={openWalletConnectDialog}>
                     {tCommon("connect_wallet")}
                   </Button>
-                </div>
+                </RoughCard>
               </section>
             ) : (
               <section className="mb-12 max-w-[1200px] mx-auto">
@@ -218,35 +219,35 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-center mb-8">
               {t("how_to_participate")}
             </h2>
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="bg-card rounded-lg p-6 text-center border">
+            <div className="grid md:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
+              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#fff8e1', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
                 <div className="text-3xl mb-3">1</div>
                 <h3 className="font-semibold mb-2">{t("step1_title")}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t("step1_desc")}
                 </p>
-              </div>
-              <div className="bg-card rounded-lg p-6 text-center border">
+              </RoughCard>
+              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#e8f5e9', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
                 <div className="text-3xl mb-3">2</div>
                 <h3 className="font-semibold mb-2">{t("step2_title")}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t("step2_desc")}
                 </p>
-              </div>
-              <div className="bg-card rounded-lg p-6 text-center border">
+              </RoughCard>
+              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#e3f2fd', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
                 <div className="text-3xl mb-3">3</div>
                 <h3 className="font-semibold mb-2">{t("step3_title")}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t("step3_desc")}
                 </p>
-              </div>
-              <div className="bg-card rounded-lg p-6 text-center border">
+              </RoughCard>
+              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#fce4ec', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
                 <div className="text-3xl mb-3">4</div>
                 <h3 className="font-semibold mb-2">{t("step4_title")}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t("step4_desc")}
                 </p>
-              </div>
+              </RoughCard>
             </div>
           </section>
         )}

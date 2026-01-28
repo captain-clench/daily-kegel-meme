@@ -4,6 +4,10 @@
  * 使用方法:
  * npx hardhat run scripts/deploy-bsc-testnet.ts --network bscTestnet
  *
+ * 可选环境变量:
+ * COOLDOWN - 冷却时间（秒），默认 86400（24小时）
+ * START_TIME - 开始时间戳，默认为当前时间 + 60 秒
+ *
  * 需要在 contracts 目录下创建 .env 文件:
  * BSC_TESTNET_PRIVATE_KEY=你的私钥
  */
@@ -29,15 +33,18 @@ async function main() {
   // 2. 部署 DailyKegel
   console.log("\n2. Deploying DailyKegel...");
 
-  // 赛季时间配置
   const now = Math.floor(Date.now() / 1000);
-  const startTime = now + 60; // 1分钟后开始
-  const endTime = now + 30 * 24 * 60 * 60; // 30天后结束
+  const startTime = process.env.START_TIME
+    ? parseInt(process.env.START_TIME)
+    : now + 60; // 默认 1 分钟后开始
+  const cooldown = process.env.COOLDOWN
+    ? parseInt(process.env.COOLDOWN)
+    : 24 * 60 * 60; // 默认 24 小时
 
   const dailyKegel = await ethers.deployContract("DailyKegel", [
     uuTokenAddress,
     startTime,
-    endTime,
+    cooldown,
   ]);
   await dailyKegel.waitForDeployment();
   const dailyKegelAddress = await dailyKegel.getAddress();
@@ -51,35 +58,21 @@ async function main() {
   console.log("UUToken:", uuTokenAddress);
   console.log("DailyKegel:", dailyKegelAddress);
   console.log("Start Time:", new Date(startTime * 1000).toISOString());
-  console.log("End Time:", new Date(endTime * 1000).toISOString());
+  console.log("Cooldown:", cooldown, "seconds", `(${cooldown / 3600} hours)`);
   console.log("========================================");
-
-  // 输出数据库插入语句
-  console.log("\n📝 数据库插入语句:");
-  console.log(`
-INSERT INTO Season (name, displayName, contractAddress, tokenAddress, chainId, startTime, endTime, active, createdAt, updatedAt)
-VALUES (
-  'season1',
-  '第一赛季',
-  '${dailyKegelAddress}',
-  '${uuTokenAddress}',
-  97,
-  FROM_UNIXTIME(${startTime}),
-  FROM_UNIXTIME(${endTime}),
-  1,
-  NOW(),
-  NOW()
-);
-  `);
 
   // 输出前端 .env 配置
   console.log("\n📝 前端 .env 配置:");
   console.log(`
-# BSC Testnet Season 1
-NEXT_PUBLIC_SEASON1_CONTRACT=${dailyKegelAddress}
-NEXT_PUBLIC_SEASON1_TOKEN=${uuTokenAddress}
+NEXT_PUBLIC_CONTRACT_ADDRESS=${dailyKegelAddress}
+NEXT_PUBLIC_TOKEN_ADDRESS=${uuTokenAddress}
 NEXT_PUBLIC_CHAIN_ID=97
   `);
+
+  // 输出验证命令
+  console.log("📝 验证合约:");
+  console.log(`npx hardhat verify --network bscTestnet ${uuTokenAddress}`);
+  console.log(`npx hardhat verify --network bscTestnet ${dailyKegelAddress} ${uuTokenAddress} ${startTime} ${cooldown}`);
 }
 
 main()

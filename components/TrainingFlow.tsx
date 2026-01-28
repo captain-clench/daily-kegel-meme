@@ -5,6 +5,8 @@ import { useMachine } from "@xstate/react";
 import { setup, assign, fromCallback } from "xstate";
 import { Button } from "@/components/ui/button";
 import { RoughCard } from "@/components/ui/rough-card";
+import { RoughFinishIcon } from "@/components/RoughFinishIcon";
+import { RoughNotation } from "react-rough-notation";
 import Image from "next/image";
 import styles from "./TrainingFlow.module.css";
 import useTrans from "@/hooks/useTrans";
@@ -286,11 +288,15 @@ export function TrainingFlow({
   // Idle 状态：显示开始训练入口
   if (isIdle) {
     return (
-      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
+      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
         <h3 className="text-xl font-semibold mb-2">{tCheckin("start_training_today")}</h3>
         <p className="text-muted-foreground mb-4">
           {tCheckin("complete_training_hint")}
         </p>
+
+        <div className="mb-6">
+          <Image src="/pp-3.png" alt="" width={240} height={240} className="mx-auto" />
+        </div>
 
         {/* Combo 提示 */}
         {hasCheckedInBefore && isInComboWindow && (
@@ -323,8 +329,10 @@ export function TrainingFlow({
 
   if (isComplete) {
     return (
-      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
-        <div className="text-6xl mb-4">🎉</div>
+      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
+        <div className="mb-4">
+          <RoughFinishIcon size={200} color="#22c55e" strokeWidth={4} roughness={2} animate animateInterval={150} />
+        </div>
         <h3 className="text-2xl font-bold mb-2">{t("complete")}</h3>
         <p className="text-muted-foreground mb-6">{t("complete_desc")}</p>
         <Button size="lg" onClick={onComplete}>
@@ -348,26 +356,49 @@ export function TrainingFlow({
   };
 
   return (
-    <RoughCard className="p-8 h-full" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#c5ddff', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={200}  solidBackgroundFill="#ffefefc9">
-      {/* Phase indicator */}
-      <div className="flex justify-center gap-2 mb-8">
-        {PHASE_ORDER.map((p) => {
-          const status = getPhaseStatus(p);
-          return (
-            <div
-              key={p}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                status === "current"
-                  ? "bg-primary"
-                  : status === "done"
-                  ? "bg-primary/50"
-                  : "bg-muted"
-              }`}
-            />
-          );
-        })}
+    <RoughCard className="p-8 h-full relative" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#c5ddff', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
+      {/* Phase indicator - 侧边栏 */}
+      <div className="relative lg:absolute lg:left-4 lg:top-1/2 lg:-translate-y-1/2 mb-6 lg:mb-0">
+        <div className="flex lg:flex-col justify-center lg:justify-start gap-3 lg:gap-4">
+          {PHASE_ORDER.map((p) => {
+            const status = getPhaseStatus(p);
+            const isCurrent = status === "current";
+            return (
+              <div
+                key={p}
+                className={`flex items-center gap-2 transition-all ${
+                  isCurrent ? "font-bold text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <div
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    status === "current"
+                      ? "bg-primary"
+                      : status === "done"
+                      ? "bg-primary/50"
+                      : "bg-muted border-2 border-primary/50"
+                  }`}
+                />
+                <span className="text-sm hidden lg:inline">
+                  {status === "done" ? (
+                    <RoughNotation key={`${p}-done`} type="crossed-off" show={true} color="#666" strokeWidth={1.5}>
+                      {t(TRAINING_CONFIG[p].nameKey)}
+                    </RoughNotation>
+                  ) : status === "current" ? (
+                    <RoughNotation key={`${p}-current`} type="highlight" show={true} color="#fef08a" animationDuration={500}>
+                      {t(TRAINING_CONFIG[p].nameKey)}
+                    </RoughNotation>
+                  ) : (
+                    t(TRAINING_CONFIG[p].nameKey)
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
+      {/* 标题区域 */}
       {isPreparing ? (
         <>
           <h3 className="text-xl font-semibold text-center mb-2">{t("preparing")}</h3>
@@ -383,12 +414,9 @@ export function TrainingFlow({
           </p>
         </>
       ) : (
-        <>
-          <h3 className="text-xl font-semibold text-center mb-2">{t(config.nameKey)}</h3>
-          <p className="text-muted-foreground text-center mb-2">
-            {t("round", { current: round, total: config.rounds })}
-          </p>
-        </>
+        <p className="text-muted-foreground text-center mb-2">
+          {t("round", { current: round, total: config.rounds })}
+        </p>
       )}
 
       {/* Timer */}

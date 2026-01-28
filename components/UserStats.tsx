@@ -43,7 +43,7 @@ export function UserStats({ contractAddress, tokenAddress }: Props) {
   const currentCombo = userData?.[3] ?? 0n;
 
   return (
-    <RoughCard className="p-6" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffcccc', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={200} solidBackgroundFill="#ffefefc9">
+    <RoughCard className="p-6 h-full" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#ffcccc', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
       <h3 className="text-xl font-bold mb-6">{t("my_data")}</h3>
       <div className="space-y-5">
         <div>

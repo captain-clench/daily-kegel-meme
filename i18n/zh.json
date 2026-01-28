@@ -70,7 +70,22 @@
       "checkin_count": "打卡次数",
       "donation_amount": "捐赠数量",
       "streak": "连击",
-      "times": "次"
+      "times": "次",
+      "from_block": "从块高 #{{block}} 开始",
+      "me": "我",
+      "add_quote_hint": "添加一句话...",
+      "enter_quote": "输入你的留言",
+      "add": "添加",
+      "edit": "编辑",
+      "save": "保存",
+      "cancel": "取消",
+      "quote_tooltip": "支持 Markdown 语法（如 **粗体**、[链接](url)），内容过长会被截断",
+      "title_combo": "Web3 第一坚硬",
+      "title_checkin": "Web3 第一持久",
+      "title_donation": "Web3 第一慷慨",
+      "champion_desc_combo": "#1 连击榜 · {{count}} 连击",
+      "champion_desc_checkin": "#1 打卡榜 · {{count}} 次",
+      "champion_desc_donation": "#1 捐赠榜 · {{amount}} UU"
     },
     "stats": {
       "my_data": "我的数据",

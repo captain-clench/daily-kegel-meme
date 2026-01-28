@@ -70,7 +70,22 @@
       "checkin_count": "Check-in Count",
       "donation_amount": "Donation Amount",
       "streak": "streak",
-      "times": "times"
+      "times": "times",
+      "from_block": "From block #{{block}}",
+      "me": "Me",
+      "add_quote_hint": "Add a quote...",
+      "enter_quote": "Enter your quote",
+      "add": "Add",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "quote_tooltip": "Supports Markdown (e.g. **bold**, [link](url)). Long text will be truncated.",
+      "title_combo": "Web3's Most Hard",
+      "title_checkin": "Web3's Most Persistent",
+      "title_donation": "Web3's Most Generous",
+      "champion_desc_combo": "#1 Combo · {{count}} streak",
+      "champion_desc_checkin": "#1 Check-in · {{count}} times",
+      "champion_desc_donation": "#1 Donation · {{amount}} UU"
     },
     "stats": {
       "my_data": "My Stats",
@@ -94,7 +109,7 @@
       "round": "Round {{current}} / {{total}}",
       "prepare": "Prepare",
       "rest": "Rest",
-      "contract": "Contract",
+      "contract": "Clench",
       "relax": "Relax",
       "continue": "Continue",
       "pause": "Pause"

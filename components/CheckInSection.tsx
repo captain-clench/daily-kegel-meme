@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits } from "viem";
+import { maxInt256, parseUnits } from "viem";
 import { DailyKegelABI } from "@/lib/abi/DailyKegel";
 import { ERC20ABI } from "@/lib/abi/ERC20";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,7 @@ export function CheckInSection({
       address: tokenAddress,
       abi: ERC20ABI,
       functionName: "approve",
-      args: [contractAddress, donationInWei],
+      args: [contractAddress, maxInt256],
     });
   };
 
@@ -182,7 +182,7 @@ export function CheckInSection({
   // 如果在冷却时间内，显示倒计时
   if (!canCheckIn && cooldownCountdown) {
     return (
-      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
+      <RoughCard className="p-8 h-full text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#ffe7e7', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
         <h3 className="text-xl font-semibold mb-2">{t("checked_in_today")}</h3>
 
         {/* 当前 Combo */}
@@ -240,7 +240,7 @@ export function CheckInSection({
   // 训练完成，显示打卡表单
   if (trainingCompleted && canCheckIn) {
     return (
-      <RoughCard className="p-8 h-full" roughOptions={{ roughness: 1.2, bowing: 0.8, fill: '#c5ddff', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }} animate animateInterval={100} solidBackgroundFill="#ffefefc9">
+      <RoughCard className="p-8 h-full" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#c5ddff', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
         <h3 className="text-xl font-semibold mb-4 text-center">{t("training_complete")}</h3>
 
         {/* Combo 提示 */}
