@@ -24,6 +24,8 @@
       "title": "Daily Kegel Exercise",
       "subtitle": "Strengthen pelvic floor muscles, improve your health",
       "description": "Complete training, check in, build Combo streaks, and climb the leaderboard!",
+      "coming_soon": "COMING SOON",
+      "coming_soon_desc": "Contract deployment in progress, stay tuned...",
       "config_incomplete": "Configuration Incomplete",
       "config_incomplete_desc": "Please configure NEXT_PUBLIC_CONTRACT_ADDRESS in .env file",
       "event_coming_soon": "Event Coming Soon",

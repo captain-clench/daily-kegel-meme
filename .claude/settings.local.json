@@ -6,7 +6,8 @@
       "Bash(npx hardhat:*)",
       "Bash(npx shadcn@latest add:*)",
       "Bash(npx tsc:*)",
-      "Bash(yarn build:*)"
+      "Bash(yarn build:*)",
+      "Bash(yarn lint:*)"
     ]
   }
 }

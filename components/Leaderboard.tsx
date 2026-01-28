@@ -16,7 +16,7 @@ import Web3 from "@/stores/web3";
 import { Pencil } from "lucide-react";
 
 interface Props {
-  contractAddress: `0x${string}`;
+  contractAddress?: `0x${string}`;
 }
 
 type LeaderboardEntry = {
@@ -232,18 +232,21 @@ export function Leaderboard({ contractAddress }: Props) {
     address: contractAddress,
     abi: DailyKegelABI,
     functionName: "getCheckinLeaderboard",
+    query: { enabled: !!contractAddress },
   });
 
   const { data: donationLeaderboard } = useReadContract({
     address: contractAddress,
     abi: DailyKegelABI,
     functionName: "getDonationLeaderboard",
+    query: { enabled: !!contractAddress },
   });
 
   const { data: comboLeaderboard } = useReadContract({
     address: contractAddress,
     abi: DailyKegelABI,
     functionName: "getComboLeaderboard",
+    query: { enabled: !!contractAddress },
   });
 
   // 过滤排行榜数据

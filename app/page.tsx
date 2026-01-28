@@ -33,17 +33,20 @@ export default function HomePage() {
   const { t, tCommon, changeLocale, locale } = useTrans("home");
   const [trainingCompleted, setTrainingCompleted] = useState(false);
 
+  // 预热模式：任一合约地址未配置
+  const isWarmupMode = !CONTRACT_ADDRESS || !TOKEN_ADDRESS;
+  const configValid = !isWarmupMode;
+
   // 读取合约 startTime
   const { data: startTime } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: DailyKegelABI,
     functionName: "startTime",
-    query: { enabled: !!CONTRACT_ADDRESS && CONTRACT_ADDRESS !== "0x待部署的合约地址" as `0x${string}` },
+    query: { enabled: !isWarmupMode },
   });
 
   const now = Math.floor(Date.now() / 1000);
   const hasStarted = startTime ? now >= Number(startTime) : false;
-  const configValid = CONTRACT_ADDRESS && CONTRACT_ADDRESS !== "0x待部署的合约地址" as `0x${string}`;
 
   // 格式化开始时间
   const formatStartTime = (timestamp: bigint) => {
@@ -130,17 +133,36 @@ export default function HomePage() {
           </p>
         </section>
 
-        {/* 配置未完成提示 */}
-        {!configValid && (
-          <section className="mb-8">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                {t("config_incomplete")}
+        {/* 预热模式：显示 Coming Soon */}
+        {isWarmupMode && (
+          <section className="mb-12 max-w-[1200px] mx-auto">
+            <RoughCard
+              className="p-12 text-center"
+              roughOptions={{
+                roughness: 2,
+                bowing: 0.8,
+                fill: '#e3f2fd',
+                fillStyle: 'hachure',
+                hachureGap: 5,
+                fillWeight: 3
+              }}
+              animate
+              animateInterval={200}
+            >
+              <h3 className="text-4xl md:text-6xl font-bold mb-4">
+                {t("coming_soon")}
               </h3>
-              <p className="text-yellow-700">
-                {t("config_incomplete_desc")}
+              <p className="text-lg text-muted-foreground mb-6">
+                {t("coming_soon_desc")}
               </p>
-            </div>
+              <Image
+                src="/pp-3.png"
+                alt="Coming Soon"
+                width={200}
+                height={200}
+                className="mx-auto w-auto h-32 md:h-48"
+              />
+            </RoughCard>
           </section>
         )}
 
@@ -161,7 +183,7 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* Main Content */}
+        {/* Main Content - 仅在非预热模式且活动已开始时显示 */}
         {configValid && hasStarted && (
           <>
             {/* 未连接钱包 */}
@@ -202,55 +224,53 @@ export default function HomePage() {
                 </div>
               </section>
             )}
-
-            {/* 排行榜 */}
-            <section>
-              <h2 className="text-2xl font-bold text-center mb-6">
-                {t("leaderboard")}
-              </h2>
-              <Leaderboard contractAddress={CONTRACT_ADDRESS} />
-            </section>
           </>
         )}
 
-        {/* How it works (当配置有效时始终显示) */}
-        {configValid && (
-          <section className="mt-16 mb-8">
-            <h2 className="text-2xl font-bold text-center mb-8">
-              {t("how_to_participate")}
-            </h2>
-            <div className="grid md:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
-              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#fff8e1', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
-                <div className="text-3xl mb-3">1</div>
-                <h3 className="font-semibold mb-2">{t("step1_title")}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("step1_desc")}
-                </p>
-              </RoughCard>
-              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#e8f5e9', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
-                <div className="text-3xl mb-3">2</div>
-                <h3 className="font-semibold mb-2">{t("step2_title")}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("step2_desc")}
-                </p>
-              </RoughCard>
-              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#e3f2fd', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
-                <div className="text-3xl mb-3">3</div>
-                <h3 className="font-semibold mb-2">{t("step3_title")}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("step3_desc")}
-                </p>
-              </RoughCard>
-              <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#fce4ec', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
-                <div className="text-3xl mb-3">4</div>
-                <h3 className="font-semibold mb-2">{t("step4_title")}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("step4_desc")}
-                </p>
-              </RoughCard>
-            </div>
-          </section>
-        )}
+        {/* 排行榜 - 始终显示 */}
+        <section>
+          <h2 className="text-2xl font-bold text-center mb-6">
+            {t("leaderboard")}
+          </h2>
+          <Leaderboard contractAddress={CONTRACT_ADDRESS} />
+        </section>
+
+        {/* How it works - 始终显示 */}
+        <section className="mt-16 mb-8">
+          <h2 className="text-2xl font-bold text-center mb-8">
+            {t("how_to_participate")}
+          </h2>
+          <div className="grid md:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
+            <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#fff8e1', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
+              <div className="text-3xl mb-3">1</div>
+              <h3 className="font-semibold mb-2">{t("step1_title")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("step1_desc")}
+              </p>
+            </RoughCard>
+            <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#e8f5e9', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
+              <div className="text-3xl mb-3">2</div>
+              <h3 className="font-semibold mb-2">{t("step2_title")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("step2_desc")}
+              </p>
+            </RoughCard>
+            <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#e3f2fd', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
+              <div className="text-3xl mb-3">3</div>
+              <h3 className="font-semibold mb-2">{t("step3_title")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("step3_desc")}
+              </p>
+            </RoughCard>
+            <RoughCard className="p-6 text-center" roughOptions={{ roughness: 2, bowing: 0.8, fill: '#fce4ec', fillStyle: 'hachure', hachureGap: 5, fillWeight: 3 }}>
+              <div className="text-3xl mb-3">4</div>
+              <h3 className="font-semibold mb-2">{t("step4_title")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("step4_desc")}
+              </p>
+            </RoughCard>
+          </div>
+        </section>
       </div>
     </main>
   );

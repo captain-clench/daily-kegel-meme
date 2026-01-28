@@ -24,6 +24,8 @@
       "title": "每日凯格尔运动",
       "subtitle": "锻炼盆底肌群，增强身体健康",
       "description": "完成训练后打卡，积累 Combo 连击，登上排行榜！",
+      "coming_soon": "即将上线",
+      "coming_soon_desc": "合约部署中，敬请期待...",
       "config_incomplete": "配置未完成",
       "config_incomplete_desc": "请在 .env 文件中配置 NEXT_PUBLIC_CONTRACT_ADDRESS",
       "event_coming_soon": "活动即将开始",
