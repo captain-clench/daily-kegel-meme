@@ -113,7 +113,7 @@ describe("DailyKegel", function () {
         .to.emit(dailyKegel, "CheckIn");
     });
 
-    it("Should reject donation less than 1 UU", async function () {
+    it("Should reject donation less than 1 UIU", async function () {
       const { dailyKegel, uuToken, user1, startTime } = await deployContracts();
 
       await setNextBlockTimestamp(startTime + 1);
@@ -477,11 +477,11 @@ describe("DailyKegel", function () {
 
       await setNextBlockTimestamp(startTime + 1);
 
-      // User1 donates 10 UU
+      // User1 donates 10 UIU
       await uuToken.connect(user1).approve(await dailyKegel.getAddress(), TEN_UU);
       await dailyKegel.connect(user1).checkIn(TEN_UU);
 
-      // User2 donates 100 UU
+      // User2 donates 100 UIU
       await uuToken.connect(user2).approve(await dailyKegel.getAddress(), HUNDRED_UU);
       await dailyKegel.connect(user2).checkIn(HUNDRED_UU);
 

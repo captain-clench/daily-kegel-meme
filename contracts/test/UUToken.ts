@@ -13,8 +13,8 @@ describe("UUToken", function () {
   describe("Deployment", function () {
     it("Should have correct name and symbol", async function () {
       const { uuToken } = await deployUUToken();
-      expect(await uuToken.name()).to.equal("UU Token");
-      expect(await uuToken.symbol()).to.equal("UU");
+      expect(await uuToken.name()).to.equal("UIU Token");
+      expect(await uuToken.symbol()).to.equal("UIU");
     });
 
     it("Should have correct decimals", async function () {

@@ -37,8 +37,8 @@ npx hardhat run scripts/deploy-bsc-testnet.ts --network bscTestnet
 COOLDOWN=300 npx hardhat run scripts/deploy-bsc-testnet.ts --network bscTestnet  # 自定义冷却时间
 
 # 单独部署 DailyKegel
-UU_TOKEN=0x... npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
-COOLDOWN=600 UU_TOKEN=0x... npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
+UIU_TOKEN=0x... npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
+COOLDOWN=600 UIU_TOKEN=0x... npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
 
 # 修改冷却时间
 CONTRACT=0x... COOLDOWN=300 npx hardhat run scripts/set-dailykegel-cooldown.ts --network bscTestnet
@@ -92,7 +92,7 @@ CONTRACT=0x... COOLDOWN=300 npx hardhat run scripts/set-dailykegel-cooldown.ts -
 - `DailyKegel.sol` - 主合约（打卡、Combo、排行榜）
 
 **DailyKegel 构造函数参数**：
-- `_uuToken` - UU 代币地址
+- `_uuToken` - UIU 代币地址
 - `_startTime` - 开始时间戳
 - `_cooldown` - 冷却时间（秒）
 
@@ -204,7 +204,7 @@ import { RoughFinishIcon } from "@/components/RoughFinishIcon";
 
 ```
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x...  # DailyKegel 合约地址
-NEXT_PUBLIC_TOKEN_ADDRESS=0x...     # UU 代币地址
+NEXT_PUBLIC_TOKEN_ADDRESS=0x...     # UIU 代币地址
 NEXT_PUBLIC_CHAIN_ID=97             # 链 ID (97=BSC Testnet, 56=BSC Mainnet)
 
 # 数据库 (Prisma)

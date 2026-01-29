@@ -9,13 +9,13 @@ import "./UUToken.sol";
  *
  * 功能：
  * - 每日打卡（冷却时间可配置）
- * - 捐赠收集（最低 1 UU）
+ * - 捐赠收集（最低 1 UIU）
  * - 排行榜维护（打卡次数、捐赠数量、Combo 各前50名）
  * - Combo 机制（连续打卡记录）
  */
 contract DailyKegel {
     // ============ 常量 ============
-    uint256 public constant MIN_DONATION = 1 * 10 ** 18; // 1 UU
+    uint256 public constant MIN_DONATION = 1 * 10 ** 18; // 1 UIU
     uint256 public constant LEADERBOARD_SIZE = 50;
 
     // ============ 状态变量 ============
@@ -98,7 +98,7 @@ contract DailyKegel {
 
     /**
      * @dev 打卡
-     * @param donation 捐赠数量（必须 >= 1 UU）
+     * @param donation 捐赠数量（必须 >= 1 UIU）
      */
     function checkIn(uint256 donation) external afterStart {
         require(donation >= MIN_DONATION, "DailyKegel: donation too small");

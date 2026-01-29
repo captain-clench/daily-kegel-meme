@@ -4,7 +4,7 @@
 
 - Node.js >= 22.10
 - 部署账户需要有足够的 BNB 支付 gas 费用
-- 已部署的 UU 代币合约地址
+- 已部署的 UIU 代币合约地址
 
 ## 环境配置
 
@@ -52,30 +52,30 @@ NODE_ENV=production npx hardhat compile
 ### 部署到 BSC 测试网
 
 ```bash
-UU_TOKEN=<UU代币地址> npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
+UIU_TOKEN=<UIU代币地址> npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
 ```
 
 示例：
 ```bash
-UU_TOKEN=0xadC13f83dc5A6D05BC19DB301d18630dE4C8146a npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
+UIU_TOKEN=0xadC13f83dc5A6D05BC19DB301d18630dE4C8146a npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
 ```
 
 ### 部署到 BSC 主网
 
 ```bash
-NODE_ENV=production UU_TOKEN=<UU代币地址> npx hardhat run scripts/deploy-dailykegel.ts --network bsc
+NODE_ENV=production UIU_TOKEN=<UIU代币地址> npx hardhat run scripts/deploy-dailykegel.ts --network bsc
 ```
 
 ### 环境变量说明
 
 | 环境变量 | 说明 | 是否必填 |
 |---------|------|---------|
-| `UU_TOKEN` | UU 代币合约地址 | 是 |
+| `UIU_TOKEN` | UIU 代币合约地址 | 是 |
 | `START_TIME` | 开始时间（Unix 时间戳） | 否，默认当前时间 |
 
 指定开始时间的示例：
 ```bash
-START_TIME=1706000000 UU_TOKEN=0x... npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
+START_TIME=1706000000 UIU_TOKEN=0x... npx hardhat run scripts/deploy-dailykegel.ts --network bscTestnet
 ```
 
 ### 部署输出
@@ -99,7 +99,7 @@ Verify on BscScan:
 部署成功后，使用输出的验证命令在 BscScan 上验证合约源码：
 
 ```bash
-npx hardhat verify --network bscTestnet <合约地址> <UU代币地址> <开始时间戳>
+npx hardhat verify --network bscTestnet <合约地址> <UIU代币地址> <开始时间戳>
 ```
 
 ## 部署后配置
@@ -130,14 +130,14 @@ await dailyKegel.setStartTime(newTimestamp);
 
 | 合约 | 地址 |
 |------|------|
-| UU Token | `0xadC13f83dc5A6D05BC19DB301d18630dE4C8146a` |
+| UIU Token | `0xadC13f83dc5A6D05BC19DB301d18630dE4C8146a` |
 | DailyKegel | 待部署 |
 
 ### BSC 主网
 
 | 合约 | 地址 |
 |------|------|
-| UU Token | 待定 |
+| UIU Token | 待定 |
 | DailyKegel | 待部署 |
 
 ## 常见问题

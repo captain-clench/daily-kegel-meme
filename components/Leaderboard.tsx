@@ -484,7 +484,7 @@ export function Leaderboard({ contractAddress }: Props) {
                     onQuoteUpdate={handleQuoteUpdate}
                   />
                   <span className="font-bold flex-shrink-0">
-                    {formatUnits(entry.value, 18)} UU
+                    {formatUnits(entry.value, 18)} UIU
                   </span>
                 </div>
               ))}

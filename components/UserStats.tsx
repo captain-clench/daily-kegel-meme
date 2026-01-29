@@ -56,15 +56,15 @@ export function UserStats({ contractAddress, tokenAddress }: Props) {
         </div>
         <div>
           <p className="text-lg font-medium text-muted-foreground">{t("total_donation")}</p>
-          <p className="text-3xl font-extrabold">{formatUnits(donationTotal, 18)} UU</p>
+          <p className="text-3xl font-extrabold">{formatUnits(donationTotal, 18)} UIU</p>
         </div>
         <div>
           <p className="text-lg font-medium text-muted-foreground">{t("uu_balance")}</p>
-          <p className="text-3xl font-extrabold">{tokenBalance ? formatUnits(tokenBalance, 18) : "0"} UU</p>
+          <p className="text-3xl font-extrabold">{tokenBalance ? formatUnits(tokenBalance, 18) : "0"} UIU</p>
         </div>
         <div>
           <p className="text-lg font-medium text-muted-foreground">{t("total_pool")}</p>
-          <p className="text-3xl font-extrabold">{totalPool ? formatUnits(totalPool, 18) : "0"} UU</p>
+          <p className="text-3xl font-extrabold">{totalPool ? formatUnits(totalPool, 18) : "0"} UIU</p>
         </div>
       </div>
     </RoughCard>

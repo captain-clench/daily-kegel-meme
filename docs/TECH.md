@@ -106,7 +106,7 @@ yarn prisma db push         # 同步 schema 到数据库
 ### 合约地址管理
 - 通过 `.env` 配置：
   - `NEXT_PUBLIC_CONTRACT_ADDRESS` - DailyKegel 合约地址
-  - `NEXT_PUBLIC_TOKEN_ADDRESS` - UU 代币地址
+  - `NEXT_PUBLIC_TOKEN_ADDRESS` - UIU 代币地址
   - `NEXT_PUBLIC_CHAIN_ID` - 链 ID（97 测试网，56 主网）
 
 ### 部署流程

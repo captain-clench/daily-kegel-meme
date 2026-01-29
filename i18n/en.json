@@ -40,7 +40,7 @@
       "step2_title": "Complete Training",
       "step2_desc": "Follow the guide to complete Kegel training",
       "step3_title": "Daily Check-in",
-      "step3_desc": "Donate UU tokens to check in",
+      "step3_desc": "Donate UIU tokens to check in",
       "step4_title": "Keep Combo",
       "step4_desc": "Check in consecutively to build Combo and climb the leaderboard"
     },
@@ -59,10 +59,10 @@
       "training_complete": "Training Complete!",
       "combo_will_be": "Combo will be {{combo}} after check-in!",
       "enter_donation": "Enter donation amount to check in",
-      "donation_amount": "Donation (UU)",
-      "min_donation": "Minimum 1 UU",
+      "donation_amount": "Donation (UIU)",
+      "min_donation": "Minimum 1 UIU",
       "approving": "Approving...",
-      "approve_uu": "Approve UU",
+      "approve_uu": "Approve UIU",
       "checking_in": "Checking in...",
       "confirm_checkin": "Confirm Check-in",
       "checkin_success": "Check-in successful!"
@@ -87,14 +87,14 @@
       "title_donation": "Web3's Most Generous",
       "champion_desc_combo": "#1 Combo · {{value}} streak",
       "champion_desc_checkin": "#1 Check-in · {{value}} times",
-      "champion_desc_donation": "#1 Donation · {{amount}} UU"
+      "champion_desc_donation": "#1 Donation · {{amount}} UIU"
     },
     "stats": {
       "my_data": "My Stats",
       "current_combo": "Current Combo",
       "checkin_count": "Check-ins",
       "total_donation": "Total Donated",
-      "uu_balance": "UU Balance",
+      "uu_balance": "UIU Balance",
       "total_pool": "Total Pool"
     },
     "training": {

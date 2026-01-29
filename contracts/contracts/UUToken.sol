@@ -7,8 +7,8 @@ pragma solidity ^0.8.28;
  * 总量：10亿枚 (1,000,000,000)
  */
 contract UUToken {
-    string public constant name = "UU Token";
-    string public constant symbol = "UU";
+    string public constant name = "UIU Token";
+    string public constant symbol = "UIU";
     uint8 public constant decimals = 18;
     uint256 public constant totalSupply = 1_000_000_000 * 10 ** 18;
 
